@@ -1,0 +1,31 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: linecnt - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\Andre\LOCALS~1\Temp\RSP1202.tmp" with contents
+[
+/nologo /MD /W4 /Gm /GX /Zi /Od /I ".\\" /I "..\FlexLexer" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"F:\projects\temp.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\Andre\LOCALS~1\Temp\RSP1202.tmp" 
+<h3>Output Window</h3>
+Compiling...
+temp.cpp
+F:\projects\temp.cpp(4) : warning C4100: 'i' : unreferenced formal parameter
+F:\projects\temp.cpp(5) : warning C4100: 'j' : unreferenced formal parameter
+F:\projects\temp.cpp(5) : warning C4100: 'i' : unreferenced formal parameter
+F:\projects\temp.cpp(11) : warning C4100: 'i' : unreferenced formal parameter
+F:\projects\temp.cpp(14) : warning C4100: 'argv' : unreferenced formal parameter
+F:\projects\temp.cpp(14) : warning C4100: 'argc' : unreferenced formal parameter
+
+
+
+<h3>Results</h3>
+temp.obj - 0 error(s), 6 warning(s)
+</pre>
+</body>
+</html>
