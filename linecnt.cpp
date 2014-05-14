@@ -43,7 +43,6 @@
 //
 //
 //
-
 struct less_stricmp {
 	bool operator () (const std::string& str1, const std::string& str2) const
 	{
@@ -70,7 +69,6 @@ static std::set<std::string, less_stricmp>	ExtList;
 //
 //
 //
-
 bool ProcessDirectory(const char *dirname);
 bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::string, less_stricmp>& subdirs);
 std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& path);
@@ -78,7 +76,6 @@ std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& pa
 //
 //
 //
-
 bool ParseSourceFile(const char *filename)
 {
 	int linecnt = 0, cppcnt = 0, ccnt = 0, slncnt = 0;
