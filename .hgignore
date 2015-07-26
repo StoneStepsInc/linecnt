@@ -1,5 +1,9 @@
-syntax: glob
+syntax: regexp
 
-CVS/*
-Debug/*
-Release/*
+^CVS/
+^Debug/
+^Release/
+
+^linecnt\.sdf$
+^linecnt\.opensdf$
+^linecnt\.v12\.suo$
