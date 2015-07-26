@@ -15,6 +15,8 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <list>
 #include <stack>
@@ -43,6 +45,7 @@
 //
 //
 //
+
 struct less_stricmp {
 	bool operator () (const std::string& str1, const std::string& str2) const
 	{
@@ -60,6 +63,9 @@ static int LineCount = 0;
 static int CppLineCount = 0;
 static int CLineCount = 0;
 static int CommentCount = 0;
+static int EmptyLineCount = 0;
+static int BraceLineCount = 0;
+static int CodeLineCount = 0;
 
 static bool VerboseOutput = false;
 static bool WalkTree = false;
@@ -69,6 +75,7 @@ static std::set<std::string, less_stricmp>	ExtList;
 //
 //
 //
+
 bool ProcessDirectory(const char *dirname);
 bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::string, less_stricmp>& subdirs);
 std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& path);
@@ -76,9 +83,10 @@ std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& pa
 //
 //
 //
+
 bool ParseSourceFile(const char *filename)
 {
-	int linecnt = 0, cppcnt = 0, ccnt = 0, slncnt = 0;
+	int linecnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0;
 	int token1;
 	FILE *srcfile;
 	char temp;
@@ -110,44 +118,58 @@ bool ParseSourceFile(const char *filename)
 		//
 		//	Parse the input
 		//
-		linecnt = 1; 
+		linecnt = 0; 
 		while((token1 = lexer1.yylex()) != TOKEN_CPP_END) {
 			switch (token1) {
-				case TOKEN_CPP_COMMENT_START:
+				case TOKEN_CODE_EOL:
+					linecnt++;
+					codecnt++;
+					break;
+				case TOKEN_CODE_CPP_COMMENT_EOL:
+					linecnt++;
+					cppcnt++;
+					codecnt++;
+					break;
+				case TOKEN_CODE_C_COMMENT_EOL:
+					linecnt++;
+					ccnt++;
+					codecnt++;
+					break;
+				case TOKEN_CODE_C_CPP_COMMENT_EOL:
+					linecnt++;
+					ccnt++;
+					cppcnt++;
+					codecnt++;
 					break;
 				case TOKEN_CPP_COMMENT_EOL:
 					linecnt++;
 					cppcnt++;
 					break;
-				case TOKEN_C_COMMENT_START:
-					//
-					// Count one C comment per line
-					//
-					if(slncnt < linecnt) {
-						ccnt++;
-						slncnt = linecnt;
-					}
-					break;
-				case TOKEN_C_COMMENT_END:
-					break;
 				case TOKEN_C_COMMENT_EOL:
 					linecnt++;
 					ccnt++;
 					break;
-				case TOKEN_EOL:
+				case TOKEN_EMPTY_LINE:
 					linecnt++;
+					EmptyLineCount++;
+					break;
+				case TOKEN_BRACE_LINE:
+					linecnt++;
+					BraceLineCount++;
 					break;
 				default:
-					printf("Unknown token: %s\n", lexer1.YYText());
+					printf("Unknown token: %s at %d\n", lexer1.YYText(), LineCount+linecnt);
 					break;
 			}
 		}
 	}
 
+
 	if(VerboseOutput)
-		printf("Lines: %5d; Commented: %5d (C++: %3d; C: %3d); %s\n", linecnt, cppcnt+ccnt, cppcnt, ccnt, filename);
+		printf("Lines: %5d; Code: %5d; Commented: %5d (C++: %3d; C: %3d); %s\n", linecnt, codecnt, cppcnt+ccnt, cppcnt, ccnt, filename);
 
 	LineCount += linecnt;
+	CodeLineCount += codecnt;
 	CppLineCount += cppcnt;
 	CLineCount += ccnt;
 
@@ -508,15 +530,18 @@ int main(int argc, char *argv[])
 	if(LineCount) {
 		printf("\n");
 		printf("Total lines           : %d\n", LineCount);
+		printf("Code lines            : %d\n", CodeLineCount);
 		printf("Commented lines       : %d (C++: %d; C: %d)\n", CommentCount, CppLineCount, CLineCount);
+		printf("Empty Lines           : %d\n", EmptyLineCount);
+		printf("Brace Lines           : %d\n", BraceLineCount);
 	}
 
 	if(CommentCount)
-		printf("Code/comments ratio   : %.2f\n", (double) (LineCount - CommentCount)/CommentCount);
+		printf("Code/comments ratio   : %.2f\n", (double) CodeLineCount/CommentCount);
 
 	if(FileCount) {
 		printf("Source lines per file : %.2f\n", (double) LineCount/FileCount);
-		printf("Code lines per file   : %.2f\n", (double) (LineCount - CommentCount)/FileCount);
+		printf("Code lines per file   : %.2f\n", (double) CodeLineCount/FileCount);
 		printf("Comments per file     : %.2f\n", (double) CommentCount/FileCount);
 	}
 
