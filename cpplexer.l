@@ -11,15 +11,22 @@ C_COMMENT_END			\*\/
 EOL				\r|\r\n|\n|\x00
 
 /*
- * All states are exclusive. Combined states indicate that both types
+ * All states are exclusive. Combined states indicate that all types
  * of source have been seen on the line (e.g. code followed by C-style
- * comments).
+ * comments or vice versa).
  */
 %x code
-%x code_c_comment
-%x code_c_comment_open
 %x c_comment
+%x cpp_comment
+
+%x code_c_comment
+%x code_cpp_comment
+%x code_c_cpp_comment
+
+%x c_cpp_comment
+
 %x c_comment_open
+%x code_c_comment_open
 
 %{
 #include "cpplexer_decl.h"
@@ -28,13 +35,19 @@ EOL				\r|\r\n|\n|\x00
 %%
 
   /* count an empty line */
-^{WS}*{EOL}					return TOKEN_EMPTY_LINE;
+^{WS}*{EOL}					               return TOKEN_EMPTY_LINE;
 
   /* count a brace-only line */
-^{WS}*[\{\}]{WS}*{EOL}				return TOKEN_BRACE_LINE;
+^{WS}*[\{\}]{WS}*{EOL}				      return TOKEN_BRACE_LINE;
 
   /* enter code state if we matched any non-whitespace characters */
 {CODE}						BEGIN(code);
+
+  /* */
+{CPP_COMMENT}                          BEGIN(cpp_comment);
+<code>{CPP_COMMENT}                    BEGIN(code_cpp_comment);
+<code_c_comment>{CPP_COMMENT}          BEGIN(code_c_cpp_comment);
+<c_comment>{CPP_COMMENT}               BEGIN(c_cpp_comment);
 
   /* enter code/C-comment state if we matched any non-whitespace characters after seeing a C comment */
 <c_comment>{CODE}				BEGIN(code_c_comment);
@@ -55,9 +68,10 @@ EOL				\r|\r\n|\n|\x00
 <code_c_comment_open>{EOL}			return TOKEN_CODE_C_COMMENT_EOL;
 
   /* count a C++ comment line and reset the state because C++ comments always end lines */
-{CPP_COMMENT}.*{EOL}				return TOKEN_CPP_COMMENT_EOL;
-<code>{CPP_COMMENT}.*{EOL}			BEGIN(INITIAL); return TOKEN_CODE_CPP_COMMENT_EOL;
-<code_c_comment>{CPP_COMMENT}.*{EOL}		BEGIN(INITIAL); return TOKEN_CODE_C_CPP_COMMENT_EOL;
+<cpp_comment>.*{EOL}                BEGIN(INITIAL); return TOKEN_CPP_COMMENT_EOL;
+<code_cpp_comment>.*{EOL}           BEGIN(INITIAL); return TOKEN_CODE_CPP_COMMENT_EOL;
+<code_c_cpp_comment>.*{EOL}         BEGIN(INITIAL); return TOKEN_CODE_C_CPP_COMMENT_EOL;
+<c_cpp_comment>.*{EOL}              BEGIN(INITIAL); return TOKEN_C_CPP_COMMENT_EOL;
 
   /* enter an open C comment state that reflects whether we saw some code or not */
 <INITIAL,c_comment>{C_COMMENT_START}		BEGIN(c_comment_open);
@@ -68,26 +82,29 @@ EOL				\r|\r\n|\n|\x00
 <code_c_comment_open>{C_COMMENT_END}		BEGIN(code_c_comment);
 
  /* 
-  * In general, we need to match trailing code or code/C-comment lines
-  * in a file with a pattern similar to that below, but current Flex 
-  * matches these trailing lines as if they has {EOL} at the end, so 
-  * there's no need for these rules.
-  * 
-  * <code><<EOF>> 				return TOKEN_TRAILING_CODE_EOL;
-  * <code_c_comment><<EOF>> 			return TOKEN_TRAILING_CODE_C_COMMENT_EOL;
-  */
-<<EOF>>						BEGIN(INITIAL); return TOKEN_CPP_END;
-
- /*
-  * Note that we do not handle the open C comment state at the end of 
-  * the file because the expectation is that the file is syntactically
-  * correct. Otherwise we would need to add a special return code to 
-  * handle the end of file with an open C comment, which is messy.
+  * We need to match trailing lines at the end of the file, but the <<EOF>> rule 
+  * does not accept patterns, so we need to maintain a state per pattern we want 
+  * to recohnize. Flex v2.5.37 on Linux matches {EOL} rules above at the end of 
+  * the file, so some of the rules below will not fire.
   *
+  * Note that we need to reset the state at the end of the file because Flex does 
+  * not do it automatically when opening a new file.
   */
 
-  /* discard non-leading whitespace in any state */
-<*>{WS}
+  /* unqualified <<EOF>> applies to all states */ 
+<INITIAL><<EOF>>                          BEGIN(INITIAL); return TOKEN_EOF;
+
+<code><<EOF>>                             BEGIN(INITIAL); return TOKEN_CODE_EOL + TOKEN_EOF;
+<c_comment><<EOF>>                        BEGIN(INITIAL); return TOKEN_C_COMMENT_EOL + TOKEN_EOF;
+<cpp_comment><<EOF>>                      BEGIN(INITIAL); return TOKEN_CPP_COMMENT_EOL + TOKEN_EOF;
+<c_cpp_comment><<EOF>>                    BEGIN(INITIAL); return TOKEN_C_CPP_COMMENT_EOL + TOKEN_EOF;
+<code_c_comment><<EOF>>                   BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF;
+<code_cpp_comment><<EOF>>                 BEGIN(INITIAL); return TOKEN_CODE_CPP_COMMENT_EOL + TOKEN_EOF;
+<code_c_cpp_comment><<EOF>>               BEGIN(INITIAL); return TOKEN_CODE_C_CPP_COMMENT_EOL + TOKEN_EOF;
+
+  /* count an unterminated C comment at the end of the file as a complete comment */
+<c_comment_open><<EOF>>                   BEGIN(INITIAL); return TOKEN_C_COMMENT_EOL + TOKEN_EOF;
+<code_c_comment_open><<EOF>>              BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF;
 
   /* discard any other characters in any state */
 <*>.

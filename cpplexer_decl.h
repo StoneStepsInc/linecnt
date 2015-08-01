@@ -29,15 +29,18 @@ class CppFlexLexer {
 //
 //
 
-#define TOKEN_CPP_END			0
-#define TOKEN_C_COMMENT_EOL		7
-#define TOKEN_CPP_COMMENT_EOL		8
-#define TOKEN_EMPTY_LINE		9
-#define TOKEN_BRACE_LINE		10
-#define TOKEN_CODE_C_COMMENT_EOL	11
-#define TOKEN_CODE_CPP_COMMENT_EOL	12
-#define TOKEN_CODE_C_CPP_COMMENT_EOL	13
-#define TOKEN_CODE_EOL			14
+#define TOKEN_EMPTY_LINE                     1
+#define TOKEN_BRACE_LINE                     2
+
+#define TOKEN_CODE_EOL                       3
+#define TOKEN_C_COMMENT_EOL                  4
+#define TOKEN_CPP_COMMENT_EOL                5
+#define TOKEN_C_CPP_COMMENT_EOL              6
+#define TOKEN_CODE_C_COMMENT_EOL             7
+#define TOKEN_CODE_CPP_COMMENT_EOL           8
+#define TOKEN_CODE_C_CPP_COMMENT_EOL         9
+
+#define TOKEN_EOF                            1000
 
 #endif // __CPPLEXER_DECL_H
 

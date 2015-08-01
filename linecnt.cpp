@@ -79,6 +79,7 @@ static std::set<std::string, less_stricmp>	ExtList;
 bool ProcessDirectory(const char *dirname);
 bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::string, less_stricmp>& subdirs);
 std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& path);
+void ProcessFileList(const std::string& dirname, const std::set<std::string, less_stricmp>& files);
 
 //
 //
@@ -86,7 +87,7 @@ std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& pa
 
 bool ParseSourceFile(const char *filename)
 {
-	int linecnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0;
+	int linecnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0, bracecnt = 0, emptycnt = 0;
 	int token1;
 	FILE *srcfile;
 	char temp;
@@ -119,55 +120,70 @@ bool ParseSourceFile(const char *filename)
 		//	Parse the input
 		//
 		linecnt = 0; 
-		while((token1 = lexer1.yylex()) != TOKEN_CPP_END) {
-			switch (token1) {
-				case TOKEN_CODE_EOL:
-					linecnt++;
-					codecnt++;
-					break;
-				case TOKEN_CODE_CPP_COMMENT_EOL:
-					linecnt++;
-					cppcnt++;
-					codecnt++;
-					break;
-				case TOKEN_CODE_C_COMMENT_EOL:
-					linecnt++;
-					ccnt++;
-					codecnt++;
-					break;
-				case TOKEN_CODE_C_CPP_COMMENT_EOL:
-					linecnt++;
-					ccnt++;
-					cppcnt++;
-					codecnt++;
-					break;
-				case TOKEN_CPP_COMMENT_EOL:
-					linecnt++;
-					cppcnt++;
-					break;
-				case TOKEN_C_COMMENT_EOL:
-					linecnt++;
-					ccnt++;
-					break;
-				case TOKEN_EMPTY_LINE:
-					linecnt++;
-					EmptyLineCount++;
-					break;
-				case TOKEN_BRACE_LINE:
-					linecnt++;
-					BraceLineCount++;
-					break;
-				default:
-					printf("Unknown token: %s at %d\n", lexer1.YYText(), LineCount+linecnt);
-					break;
-			}
+		if((token1 = lexer1.yylex()) != TOKEN_EOF) {
+         do {
+			   switch (token1) {
+				   case TOKEN_EMPTY_LINE:
+					   linecnt++;
+					   emptycnt++;
+					   break;
+				   case TOKEN_BRACE_LINE:
+					   linecnt++;
+					   bracecnt++;
+					   break;
+				   case TOKEN_CODE_EOL:
+				   case TOKEN_CODE_EOL + TOKEN_EOF:
+					   linecnt++;
+					   codecnt++;
+					   break;
+				   case TOKEN_C_COMMENT_EOL:
+				   case TOKEN_C_COMMENT_EOL + TOKEN_EOF:
+					   linecnt++;
+					   ccnt++;
+					   break;
+				   case TOKEN_CPP_COMMENT_EOL:
+				   case TOKEN_CPP_COMMENT_EOL + TOKEN_EOF:
+					   linecnt++;
+					   cppcnt++;
+					   break;
+				   case TOKEN_C_CPP_COMMENT_EOL:
+				   case TOKEN_C_CPP_COMMENT_EOL + TOKEN_EOF:
+					   linecnt++;
+					   cppcnt++;
+                  ccnt++;
+					   break;
+				   case TOKEN_CODE_C_COMMENT_EOL:
+				   case TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF:
+					   linecnt++;
+					   ccnt++;
+					   codecnt++;
+					   break;
+				   case TOKEN_CODE_CPP_COMMENT_EOL:
+				   case TOKEN_CODE_CPP_COMMENT_EOL + TOKEN_EOF:
+					   linecnt++;
+					   cppcnt++;
+					   codecnt++;
+					   break;
+				   case TOKEN_CODE_C_CPP_COMMENT_EOL:
+				   case TOKEN_CODE_C_CPP_COMMENT_EOL + TOKEN_EOF:
+					   linecnt++;
+					   ccnt++;
+					   cppcnt++;
+					   codecnt++;
+					   break;
+				   default:
+					   printf("Unknown token: %s at %d\n", lexer1.YYText(), LineCount+linecnt);
+					   break;
+			   }
+         } while(token1 < TOKEN_EOF && ((token1 = lexer1.yylex()) != TOKEN_EOF));
 		}
 	}
 
-
 	if(VerboseOutput)
-		printf("Lines: %5d; Code: %5d; Commented: %5d (C++: %3d; C: %3d); %s\n", linecnt, codecnt, cppcnt+ccnt, cppcnt, ccnt, filename);
+		printf("  %6d  %6d   %6d  %6d  %6d  %s\n", linecnt, codecnt, cppcnt+ccnt, emptycnt, bracecnt, filename);
 
+   EmptyLineCount += emptycnt;
+   BraceLineCount += bracecnt;
 	LineCount += linecnt;
 	CodeLineCount += codecnt;
 	CppLineCount += cppcnt;
@@ -184,8 +200,9 @@ bool ParseSourceFile(const char *filename)
 	return true;
 }
 
-void ProcessFileList(const std::set<std::string, less_stricmp>& files)
+void ProcessFileList(const std::string& dirname, const std::set<std::string, less_stricmp>& files)
 {
+   bool header = false;
 	const char *filename, *cptr;
 	std::set<std::string, less_stricmp>::const_iterator iter;
 	int filecnt = 0;
@@ -201,8 +218,15 @@ void ProcessFileList(const std::set<std::string, less_stricmp>& files)
 			continue;
 
 		if(ExtList.find(++cptr) != ExtList.end()) {
-			if(VerboseOutput && filecnt++ == 0)
-				printf("\n");
+			if(VerboseOutput) {
+            if(!header) {
+               printf("\n   Lines    Code  Comment   Empty   Brace\n");
+               printf(  "  ------  ------ --------  ------  ------\n");
+               header = true;
+            }
+
+            filecnt++;
+         }
 			ParseSourceFile(filename);
 			FileCount++;
 		}
@@ -226,9 +250,6 @@ bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
 
 	while(iter != subdirs->end()) {
 
-		if((*iter).length() == 0)
-			continue;
-
 		DirCount++;
 
 		dirname = *iter;
@@ -239,7 +260,7 @@ bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
 		pathlist.push_back(dirname);
 
 		if(VerboseOutput)
-			printf("*** Directory: %s\n", GetFullPath(pathlist, temp).c_str());
+			printf("%s\n", GetFullPath(pathlist, temp).c_str());
 
 		//
 		//	When saving the current directory list's state, instead of saving
@@ -255,7 +276,7 @@ bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
 		// the current directory. 
 		//
 		EnumCurrentDir(files, *subdirs);
-		ProcessFileList(files);
+		ProcessFileList(dirname, files);
 		files.clear();
 
 		//
@@ -299,11 +320,13 @@ bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::st
 			if(!stricmp(fileinfo.name, ".") || !stricmp(fileinfo.name, "..")) 
 				continue;
 
-			subdirs.insert(fileinfo.name);
+         if(*fileinfo.name)
+			   subdirs.insert(fileinfo.name);
 			continue;
 		}
 
-		files.insert(std::string(fileinfo.name));
+      if(*fileinfo.name)
+		   files.insert(fileinfo.name);
 
 	} while(_findnext(fhandle, &fileinfo) == 0);
 
@@ -333,11 +356,13 @@ bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::st
 			if(!stricmp(entry->d_name, ".") || !stricmp(entry->d_name, "..")) 
 				continue;
 
-			subdirs.insert(entry->d_name);
+         if(*entry->d_name)
+			   subdirs.insert(entry->d_name);
 			continue;
 		}
 
-		files.insert(std::string(entry->d_name));
+      if(*entry->d_name)
+		   files.insert(entry->d_name);
 
 	}
 
@@ -365,11 +390,11 @@ bool ProcessDirectory(const char *dirname)
 	}
 
 	if(VerboseOutput)
-		printf("*** Directory: %s\n", dirname);
+		printf("%s\n", dirname);
 
 	EnumCurrentDir(files, subdirs);
 
-	ProcessFileList(files);
+	ProcessFileList(dirname, files);
 
 	if(WalkTree) {
 		if(ProcessDirList(subdirs) == false)
@@ -529,20 +554,20 @@ int main(int argc, char *argv[])
 
 	if(LineCount) {
 		printf("\n");
-		printf("Total lines           : %d\n", LineCount);
-		printf("Code lines            : %d\n", CodeLineCount);
-		printf("Commented lines       : %d (C++: %d; C: %d)\n", CommentCount, CppLineCount, CLineCount);
-		printf("Empty Lines           : %d\n", EmptyLineCount);
-		printf("Brace Lines           : %d\n", BraceLineCount);
+		printf("Total lines            : %d\n", LineCount);
+		printf("Code lines             : %d\n", CodeLineCount);
+		printf("Commented lines        : %d (C++: %d; C: %d)\n", CommentCount, CppLineCount, CLineCount);
+		printf("Empty Lines            : %d\n", EmptyLineCount);
+		printf("Brace Lines            : %d\n", BraceLineCount);
 	}
 
 	if(CommentCount)
-		printf("Code/comments ratio   : %.2f\n", (double) CodeLineCount/CommentCount);
+		printf("Code/comments ratio    : %.2f\n", (double) CodeLineCount/CommentCount);
 
 	if(FileCount) {
-		printf("Source lines per file : %.2f\n", (double) LineCount/FileCount);
-		printf("Code lines per file   : %.2f\n", (double) CodeLineCount/FileCount);
-		printf("Comments per file     : %.2f\n", (double) CommentCount/FileCount);
+		printf("Source lines per file  : %.2f\n", (double) LineCount/FileCount);
+		printf("Code lines per file    : %.2f\n", (double) CodeLineCount/FileCount);
+		printf("Comment lines per file : %.2f\n", (double) CommentCount/FileCount);
 	}
 
 	printf("\n");
