@@ -34,7 +34,7 @@
 //
 //
 
-#define LINECNT_VERSION_TEXT		"1.01"
+#define LINECNT_VERSION_TEXT		"2.0"
 
 #if defined(_WIN32)
 #define DIRSEPARATORSTRING "\\"
@@ -395,7 +395,7 @@ std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& pa
 
 void PrintCopyrightLine(void)
 {
-	printf("Copyright 2003, Stone Steps Inc. http://www.stonesteps.ca\n\n");
+	printf("Copyright 2015, Stone Steps Inc. http://www.stonesteps.ca\n\n");
 }
 
 void PrintUsage(void)
