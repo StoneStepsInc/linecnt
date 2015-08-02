@@ -9,7 +9,7 @@
 
 CppFlexLexer::CppFlexLexer(FILE* arg_yyin, FILE* arg_yyout)
 {
-	yyrestart(arg_yyin);
+   yyrestart(arg_yyin);
 }
 
 CppFlexLexer::~CppFlexLexer(void)
@@ -18,10 +18,10 @@ CppFlexLexer::~CppFlexLexer(void)
 
 int CppFlexLexer::yylex(void)
 {
-	return ::yylex();
+   return ::yylex();
 }
 
 const char *CppFlexLexer::YYText(void)
 {
-	return yytext;
+   return yytext;
 }

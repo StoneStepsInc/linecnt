@@ -7,14 +7,14 @@
 //
 //
 class CppFlexLexer {
-	public:
-		CppFlexLexer(FILE* arg_yyin = NULL, FILE* arg_yyout = NULL );
+   public:
+      CppFlexLexer(FILE* arg_yyin = NULL, FILE* arg_yyout = NULL );
 
-		~CppFlexLexer(void);
+      ~CppFlexLexer(void);
         
-		const char *YYText(void);
+      const char *YYText(void);
 
-		int yylex(void);
+      int yylex(void);
 };
 
 #ifndef __CPPLEXER_IMP_CPP
