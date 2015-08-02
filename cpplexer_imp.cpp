@@ -1,7 +1,5 @@
 #define __CPPLEXER_IMP_CPP
 
-//#include "cpplexer_decl.h"
-
 //
 //
 //

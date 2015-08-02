@@ -1,11 +1,8 @@
-
 #if defined(_WIN32)
-#pragma warning (disable: 4786)
 #define STRICT
 #include <windows.h>
 #include <io.h>
 #include <direct.h>
-#include <strstrea.h>
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -25,7 +22,11 @@
 
 #include "cpplexer_decl.h"
 
-#if !defined(_WIN32)
+#if defined(_WIN32)
+#define stricmp _stricmp
+#define chdir _chdir
+#define getcwd _getcwd
+#else
 #define stricmp strcasecmp
 #define _MAX_PATH 4096
 #endif

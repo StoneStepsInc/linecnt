@@ -3,19 +3,15 @@
 
 #include <stdio.h>
 
-#ifndef __CPPLEXER_IMP_CPP
-#include "cpplexer_decl.h"
-#endif
 //
 //
 //
-
 class CppFlexLexer {
 	public:
 		CppFlexLexer(FILE* arg_yyin = NULL, FILE* arg_yyout = NULL );
 
 		~CppFlexLexer(void);
-		
+        
 		const char *YYText(void);
 
 		int yylex(void);
