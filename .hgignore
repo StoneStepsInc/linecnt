@@ -7,3 +7,6 @@ syntax: regexp
 ^linecnt\.sdf$
 ^linecnt\.opensdf$
 ^linecnt\.v12\.suo$
+^linecnt\.vcxproj\.user$
+
+^cpplexer\.inc$
