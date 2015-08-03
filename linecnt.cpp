@@ -221,8 +221,9 @@ void ProcessFileList(const std::string& dirname, const std::set<std::string, les
       if(ExtList.find(++cptr) != ExtList.end()) {
          if(VerboseOutput) {
             if(!header) {
-               printf("\n   Lines    Code  Comment   Empty   Brace\n");
-               printf(  "  ------  ------ --------  ------  ------\n");
+               printf("Directory: %s\n\n", dirname.c_str());
+               printf("   Lines    Code  Comment   Empty   Brace\n");
+               printf("  ------  ------ --------  ------  ------\n");
                header = true;
             }
 
@@ -260,9 +261,6 @@ bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
       }
       pathlist.push_back(dirname);
 
-      if(VerboseOutput)
-         printf("%s\n", GetFullPath(pathlist, temp).c_str());
-
       //
       //   When saving the current directory list's state, instead of saving
       // both, the iterator and the list, remove the current item and save
@@ -277,7 +275,7 @@ bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
       // the current directory. 
       //
       EnumCurrentDir(files, *subdirs);
-      ProcessFileList(dirname, files);
+      ProcessFileList(GetFullPath(pathlist, temp), files);
       files.clear();
 
       //
@@ -389,9 +387,6 @@ bool ProcessDirectory(const char *dirname)
       getcwd(buffer, sizeof(buffer));
       dirname = buffer;
    }
-
-   if(VerboseOutput)
-      printf("%s\n", dirname);
 
    EnumCurrentDir(files, subdirs);
 
