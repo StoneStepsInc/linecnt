@@ -180,8 +180,12 @@ bool ParseSourceFile(const char *filename)
       }
    }
 
-   if(VerboseOutput)
-      printf("  %6d  %6d   %6d  %6d  %6d  %s\n", linecnt, codecnt, cppcnt+ccnt, emptycnt, bracecnt, filename);
+   if(VerboseOutput) {
+      char cpp_c_cnt[32];
+      // make a shared column for C and C++ commented line counts
+      sprintf(cpp_c_cnt, "%d/%d", cppcnt, ccnt); 
+      printf("   %5d  %5d      %5d  %10s  %5d  %5d  %s\n", linecnt, codecnt, cppcnt+ccnt, cpp_c_cnt, emptycnt, bracecnt, filename);
+   }
 
    EmptyLineCount += emptycnt;
    BraceLineCount += bracecnt;
@@ -222,8 +226,8 @@ void ProcessFileList(const std::string& dirname, const std::set<std::string, les
          if(VerboseOutput) {
             if(!header) {
                printf("Directory: %s\n\n", dirname.c_str());
-               printf("   Lines    Code  Comment   Empty   Brace\n");
-               printf("  ------  ------ --------  ------  ------\n");
+               printf("   Lines   Code  Commented     (C++/C)  Empty  Brace\n");
+               printf("  ------ ------ ---------- ----------- ------ ------\n");
                header = true;
             }
 
