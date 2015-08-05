@@ -53,7 +53,6 @@
 //
 //
 //
-
 struct less_stricmp {
    bool operator () (const std::string& str1, const std::string& str2) const
    {
@@ -64,7 +63,6 @@ struct less_stricmp {
 //
 //
 //
-
 static int FileCount = 0;
 static int DirCount = 1;
 static int LineCount = 0;
@@ -85,9 +83,9 @@ static std::set<std::string, less_stricmp>   ExtList;
 //
 
 bool ProcessDirectory(const char *dirname);
-bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::string, less_stricmp>& subdirs);
+bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs);
 std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& path);
-void ProcessFileList(const std::string& dirname, const std::set<std::string, less_stricmp>& files);
+void ProcessFileList(const std::string& dirname, const std::set<std::string>& files);
 
 //
 //
@@ -212,11 +210,11 @@ bool ParseSourceFile(const char *filename)
    return true;
 }
 
-void ProcessFileList(const std::string& dirname, const std::set<std::string, less_stricmp>& files)
+void ProcessFileList(const std::string& dirname, const std::set<std::string>& files)
 {
    bool header = false;
    const char *filename, *cptr;
-   std::set<std::string, less_stricmp>::const_iterator iter;
+   std::set<std::string>::const_iterator iter;
    int filecnt = 0;
 
    if(files.size() == 0)
@@ -249,15 +247,15 @@ void ProcessFileList(const std::string& dirname, const std::set<std::string, les
       printf("\n");
 }
 
-bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
+bool ProcessDirList(std::set<std::string>& dirs)
 {
    std::string dirname, temp;
-   std::stack<std::set<std::string, less_stricmp>*> stack;
-   std::set<std::string, less_stricmp>::iterator iter;
-   std::set<std::string, less_stricmp> files;
+   std::stack<std::set<std::string>*> stack;
+   std::set<std::string>::iterator iter;
+   std::set<std::string> files;
    std::list<std::string> pathlist;
 
-   std::set<std::string, less_stricmp> *subdirs = &dirs;
+   std::set<std::string> *subdirs = &dirs;
 
    iter = subdirs->begin();
 
@@ -273,16 +271,16 @@ bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
       pathlist.push_back(dirname);
 
       //
-      //   When saving the current directory list's state, instead of saving
+      // When saving the current directory list's state, instead of saving
       // both, the iterator and the list, remove the current item and save
       // only the list. 
       //
       subdirs->erase(iter);
       stack.push(subdirs);
-      subdirs = new std::set<std::string, less_stricmp>;
+      subdirs = new std::set<std::string>;
 
       //
-      //   Populate the list with directories and process the files in
+      // Populate the list with directories and process the files in
       // the current directory. 
       //
       EnumCurrentDir(files, *subdirs);
@@ -290,7 +288,7 @@ bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
       files.clear();
 
       //
-      //   If the new directory list is empty, delete the list and then
+      // If the new directory list is empty, delete the list and then
       // delete every empty list on top of the stack, moving one directory
       // every time. Note that the top directory wasn't allocated by this
       // function and shouldn't be deleted. 
@@ -314,7 +312,7 @@ bool ProcessDirList(std::set<std::string, less_stricmp>& dirs)
 }
 
 #if defined(_WIN32)
-bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::string, less_stricmp>& subdirs)
+bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs)
 {
    struct _finddata_t fileinfo;
    long fhandle;
@@ -327,7 +325,7 @@ bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::st
 
    do {
       if(fileinfo.attrib & _A_SUBDIR) {
-         if(!stricmp(fileinfo.name, ".") || !stricmp(fileinfo.name, "..")) 
+         if(!strcmp(fileinfo.name, ".") || !strcmp(fileinfo.name, "..")) 
             continue;
 
          if(*fileinfo.name)
@@ -345,7 +343,7 @@ bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::st
    return true;
 }
 #else
-bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::string, less_stricmp>& subdirs)
+bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs)
 {
    DIR *dir;
    struct dirent *entry;
@@ -363,7 +361,7 @@ bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::st
          return false;
 
       if(S_ISDIR(statinfo.st_mode)) {
-         if(!stricmp(entry->d_name, ".") || !stricmp(entry->d_name, "..")) 
+         if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) 
             continue;
 
          if(*entry->d_name)
@@ -384,8 +382,8 @@ bool EnumCurrentDir(std::set<std::string, less_stricmp>& files, std::set<std::st
 
 bool ProcessDirectory(const char *dirname)
 {
-   std::set<std::string, less_stricmp> files;
-   std::set<std::string, less_stricmp> subdirs;
+   std::set<std::string> files;
+   std::set<std::string> subdirs;
    char buffer[_MAX_PATH];
 
    if(dirname && *dirname)   {
