@@ -93,7 +93,7 @@ void ProcessFileList(const std::string& dirname, const std::set<std::string>& fi
 
 bool ParseSourceFile(const char *filename)
 {
-   int linecnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0, bracecnt = 0, emptycnt = 0;
+   int linecnt = 0, cmntcnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0, bracecnt = 0, emptycnt = 0;
    int token1;
    FILE *srcfile;
    char temp;
@@ -130,10 +130,12 @@ bool ParseSourceFile(const char *filename)
          do {
             switch (token1) {
                case TOKEN_EMPTY_LINE:
+               case TOKEN_EMPTY_LINE + TOKEN_EOF:
                   linecnt++;
                   emptycnt++;
                   break;
                case TOKEN_BRACE_LINE:
+               case TOKEN_BRACE_LINE + TOKEN_EOF:
                   linecnt++;
                   bracecnt++;
                   break;
@@ -146,29 +148,34 @@ bool ParseSourceFile(const char *filename)
                case TOKEN_C_COMMENT_EOL + TOKEN_EOF:
                   linecnt++;
                   ccnt++;
+                  cmntcnt++;
                   break;
                case TOKEN_CPP_COMMENT_EOL:
                case TOKEN_CPP_COMMENT_EOL + TOKEN_EOF:
                   linecnt++;
                   cppcnt++;
+                  cmntcnt++;
                   break;
                case TOKEN_C_CPP_COMMENT_EOL:
                case TOKEN_C_CPP_COMMENT_EOL + TOKEN_EOF:
                   linecnt++;
                   cppcnt++;
                   ccnt++;
+                  cmntcnt++;
                   break;
                case TOKEN_CODE_C_COMMENT_EOL:
                case TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF:
                   linecnt++;
                   ccnt++;
                   codecnt++;
+                  cmntcnt++;
                   break;
                case TOKEN_CODE_CPP_COMMENT_EOL:
                case TOKEN_CODE_CPP_COMMENT_EOL + TOKEN_EOF:
                   linecnt++;
                   cppcnt++;
                   codecnt++;
+                  cmntcnt++;
                   break;
                case TOKEN_CODE_C_CPP_COMMENT_EOL:
                case TOKEN_CODE_C_CPP_COMMENT_EOL + TOKEN_EOF:
@@ -176,6 +183,7 @@ bool ParseSourceFile(const char *filename)
                   ccnt++;
                   cppcnt++;
                   codecnt++;
+                  cmntcnt++;
                   break;
                default:
                   printf("Unknown token: %s at %d\n", lexer1.YYText(), LineCount+linecnt);
@@ -189,7 +197,7 @@ bool ParseSourceFile(const char *filename)
       char cpp_c_cnt[32];
       // make a shared column for C and C++ commented line counts
       sprintf(cpp_c_cnt, "%d/%d", cppcnt, ccnt); 
-      printf("   %5d  %5d      %5d  %10s  %5d  %5d  %s\n", linecnt, codecnt, cppcnt+ccnt, cpp_c_cnt, emptycnt, bracecnt, filename);
+      printf("   %5d  %5d      %5d  %10s  %5d  %5d  %s\n", linecnt, codecnt, cmntcnt, cpp_c_cnt, emptycnt, bracecnt, filename);
    }
 
    EmptyLineCount += emptycnt;
@@ -198,9 +206,7 @@ bool ParseSourceFile(const char *filename)
    CodeLineCount += codecnt;
    CppLineCount += cppcnt;
    CLineCount += ccnt;
-
-   CommentCount += cppcnt;
-   CommentCount += ccnt;
+   CommentCount += cmntcnt;
 
    //
    //   Clean up
