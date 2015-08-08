@@ -18,6 +18,10 @@ C_COMMENT_END        \*\/
 EOL                  \r|\r\n|\n|\x00
 
 /*
+ * Use start conditions to match pattern groups selectively and also
+ * handle end-of-file based on the current parsing state, which is 
+ * necessary because <<EOF>> does not allow patterns.
+ *
  * All states are exclusive. Combined states indicate that all types
  * of source have been seen on the line (e.g. code followed by C-style
  * comments or vice versa).
@@ -35,23 +39,33 @@ EOL                  \r|\r\n|\n|\x00
 %x c_comment_open
 %x code_c_comment_open
 
+%x lws
+%x lbr
+
 %{
 #include "cpplexer_decl.h"
 %}
 
 %%
 
+  /* check for leading whitespace */
+^{WS}+                                    BEGIN(lws);
+
+  /* check for leading single brace surrounded by optional whitespace */
+^{WS}*[\{\}]{WS}*                         BEGIN(lbr);
+
   /* count an empty line */
-^{WS}*{EOL}                               return TOKEN_EMPTY_LINE;
+^{EOL}                                    BEGIN(INITIAL); return TOKEN_EMPTY_LINE;
+<lws>{EOL}                                BEGIN(INITIAL); return TOKEN_EMPTY_LINE;
 
   /* count a brace-only line */
-^{WS}*[\{\}]{WS}*{EOL}                    return TOKEN_BRACE_LINE;
+<lbr>{EOL}                                BEGIN(INITIAL); return TOKEN_BRACE_LINE;
 
   /* enter code state if we matched any non-whitespace characters */
-{CODE}                                    BEGIN(code);
+<INITIAL,lws,lbr>{CODE}                   BEGIN(code);
 
-  /* */
-{CPP_COMMENT}                             BEGIN(cpp_comment);
+  /* enter the C++ comment state */
+<INITIAL,lws,lbr>{CPP_COMMENT}            BEGIN(cpp_comment);
 <code>{CPP_COMMENT}                       BEGIN(code_cpp_comment);
 <code_c_comment>{CPP_COMMENT}             BEGIN(code_c_cpp_comment);
 <c_comment>{CPP_COMMENT}                  BEGIN(c_cpp_comment);
@@ -81,7 +95,7 @@ EOL                  \r|\r\n|\n|\x00
 <c_cpp_comment>.*{EOL}                    BEGIN(INITIAL); return TOKEN_C_CPP_COMMENT_EOL;
 
   /* enter an open C comment state that reflects whether we saw some code or not */
-<INITIAL,c_comment>{C_COMMENT_START}      BEGIN(c_comment_open);
+<INITIAL,lws,lbr,c_comment>{C_COMMENT_START}      BEGIN(c_comment_open);
 <code,code_c_comment>{C_COMMENT_START}    BEGIN(code_c_comment_open);
 
   /* close an open C comment and enter the state that reflects whether we saw some code or not */
@@ -92,14 +106,17 @@ EOL                  \r|\r\n|\n|\x00
   * We need to match trailing lines at the end of the file, but the <<EOF>> rule 
   * does not accept patterns, so we need to maintain a state per pattern we want 
   * to recohnize. Flex v2.5.37 on Linux matches {EOL} rules above at the end of 
-  * the file, so some of the rules below will not fire.
+  * the file, so some of the rules below will not fire on Linux.
   *
-  * Note that we need to reset the state at the end of the file because Flex does 
-  * not do it automatically when opening a new file.
+  * The state should be reset back to INITIAL at the end of the file because Flex 
+  * does not do it automatically when opening a new file.
+  *
+  * Note that unqualified <<EOF>> applies to all start conditions.
   */
 
-  /* unqualified <<EOF>> applies to all states */ 
-<INITIAL><<EOF>>                          BEGIN(INITIAL); return TOKEN_EOF;
+<INITIAL,lws><<EOF>>                      BEGIN(INITIAL); return TOKEN_EMPTY_LINE + TOKEN_EOF;
+
+<lbr><<EOF>>                              BEGIN(INITIAL); return TOKEN_BRACE_LINE + TOKEN_EOF;
 
 <code><<EOF>>                             BEGIN(INITIAL); return TOKEN_CODE_EOL + TOKEN_EOF;
 <c_comment><<EOF>>                        BEGIN(INITIAL); return TOKEN_C_COMMENT_EOL + TOKEN_EOF;
