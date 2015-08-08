@@ -1,0 +1,14 @@
+
+code
+{
+        {
+        }
+}
+
+        // C++ comment
+        /* C comment */
+
+ code /* C comment */ code /* C comment */
+ code /* C comment */ code // C++ comment
+
+trailing code line
