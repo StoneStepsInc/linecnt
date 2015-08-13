@@ -15,7 +15,7 @@ CODE                 [^\x09\x0B\x0C\x0E-\x20\r\n]
 CPP_COMMENT          \/\/
 C_COMMENT_START      \/\*
 C_COMMENT_END        \*\/
-EOL                  \r|\r\n|\n|\x00
+EOL                  \r\n|\r|\n
 
 /*
  * Use start conditions to match pattern groups selectively and also
