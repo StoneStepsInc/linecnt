@@ -42,6 +42,9 @@ EOL                  \r\n|\r|\n
 %x lws
 %x lbr
 
+%x str
+%x str_c_comment
+
 %{
 #include "cpplexer_decl.h"
 %}
@@ -53,6 +56,27 @@ EOL                  \r\n|\r|\n
 
   /* check for leading single brace surrounded by optional whitespace */
 ^{WS}*[\{\}]{WS}*                         BEGIN(lbr);
+
+  /* a string is considered as code, so we only need to track if we saw C comments */
+<INITIAL,lws,lbr,code>\"                  BEGIN(str);
+<c_comment,code_c_comment>\"              BEGIN(str_c_comment);
+
+  /* ignore the '\' character followed by new-line */
+<str,str_c_comment>\\{EOL}
+
+  /* ignore all escape sequences */
+<str,str_c_comment>\\.
+
+  /* count lines with unterminiated strings (shouldn't happen in compilable code) */
+<str>{EOL}                                BEGIN(INITIAL); return TOKEN_CODE_EOL;
+<str_c_comment>{EOL}                      BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
+
+  /* ignore all other string characters (must be after all the patterns above) */
+<str,str_c_comment>[^\"]
+
+  /* end the string and enter the code state based on whether we saw any C comments */
+<str>\"                                   BEGIN(code);
+<str_c_comment>\"                         BEGIN(code_c_comment);
 
   /* count an empty line */
 ^{EOL}                                    BEGIN(INITIAL); return TOKEN_EMPTY_LINE;
@@ -129,6 +153,10 @@ EOL                  \r\n|\r|\n
   /* count an unterminated C comment at the end of the file as a complete comment */
 <c_comment_open><<EOF>>                   BEGIN(INITIAL); return TOKEN_C_COMMENT_EOL + TOKEN_EOF;
 <code_c_comment_open><<EOF>>              BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF;
+
+  /* count lines with unterminiated strings (shouldn't happen in compilable code) */
+<str><<EOF>>                              BEGIN(INITIAL); return TOKEN_CODE_EOL;
+<str_c_comment><<EOF>>                    BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
 
   /* discard any other characters in any state */
 <*>.

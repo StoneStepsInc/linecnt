@@ -1,0 +1,10 @@
+"string"
+   "indented string with a /* comment */"
+	"unterminated string
+{ "string"
+   { "string"
+code "string" code
+code /* comment */ "string"
+/* comment */ "//string"
+/* comment */ "string" /* comment */
+"unterminated string
