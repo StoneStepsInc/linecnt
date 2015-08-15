@@ -440,8 +440,8 @@ void PrintUsage(void)
    printf("  -s    Process files in the current directory and all subdirectories\n");
    printf("  -v    Produce verbose output\n");
    printf("  -d    Start in the specified directory\n");
-   printf("  -c    Add standard C/C++ extensions to the list\n");
-   printf("  -j    Add standard Java extensions to the list\n");
+   printf("  -c    Add common C/C++ extensions to the list\n");
+   printf("  -j    Add common Java extensions to the list\n");
    printf("  -V    Print version information\n");
    printf("  -W    Print warranty information\n");
    printf("  -h    Print this help\n");
@@ -510,6 +510,8 @@ int main(int argc, char *argv[])
                   break;
                case 'c':
                   ExtList.insert("cpp");
+                  ExtList.insert("cxx");
+                  ExtList.insert("hpp");
                   ExtList.insert("h");
                   ExtList.insert("c");
                   break;
