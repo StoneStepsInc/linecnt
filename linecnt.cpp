@@ -28,6 +28,7 @@
 #include <string>
 
 #include "cpplexer_decl.h"
+#include "version.h"
 
 #if defined(_WIN32)
 #define stricmp _stricmp
@@ -41,8 +42,6 @@
 //
 //
 //
-
-#define LINECNT_VERSION_TEXT      "2.0"
 
 #if defined(_WIN32)
 #define DIRSEPARATORSTRING "\\"
@@ -431,7 +430,7 @@ std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& pa
 
 void PrintCopyrightLine(void)
 {
-   printf("Copyright 2015, Stone Steps Inc. http://www.stonesteps.ca\n\n");
+   printf("Copyright 2003-2015, Stone Steps Inc. http://www.stonesteps.ca\n\n");
 }
 
 void PrintUsage(void)
@@ -473,7 +472,7 @@ void PrintFileExtensions(const char *fmt, const std::set<std::string, less_stric
 
 void PrintVersion(void)
 {
-   printf("Version: %s\n", LINECNT_VERSION_TEXT);
+   printf("Version: %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, EDITION_LEVEL);
 }
 
 void PrintWarranty(void)
