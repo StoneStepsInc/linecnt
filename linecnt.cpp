@@ -40,9 +40,8 @@
 #endif
 
 //
+// Platform-specific directory name separator
 //
-//
-
 #if defined(_WIN32)
 #define DIRSEPARATORSTRING "\\"
 #else
@@ -50,7 +49,7 @@
 #endif
 
 //
-//
+// Case-insensitive string comparison function
 //
 struct less_stricmp {
    bool operator () (const std::string& str1, const std::string& str2) const
@@ -60,27 +59,30 @@ struct less_stricmp {
 };
 
 //
+// Various counters
 //
-//
-static int FileCount = 0;
-static int DirCount = 1;
-static int LineCount = 0;
-static int CppLineCount = 0;
-static int CLineCount = 0;
-static int CommentCount = 0;
-static int EmptyLineCount = 0;
-static int BraceLineCount = 0;
-static int CodeLineCount = 0;
+static int FileCount = 0;                 // total file count
+static int DirCount = 1;                  // total directory count
+static int LineCount = 0;                 // total source line count
+static int CppLineCount = 0;              // C++ -commented line count
+static int CLineCount = 0;                // C-commented line count
+static int CommentCount = 0;              // commented line count
+static int EmptyLineCount = 0;            // empty line count
+static int BraceLineCount = 0;            // brace-only line count
+static int CodeLineCount = 0;             // code line count
 
+//
+// Run flags
+//
 static bool VerboseOutput = false;
 static bool WalkTree = false;
 
+// a set of case-insensitive file extensions to process
 static std::set<std::string, less_stricmp>   ExtList;
 
 //
 //
 //
-
 bool ProcessDirectory(const char *dirname);
 bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs);
 std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& path);
