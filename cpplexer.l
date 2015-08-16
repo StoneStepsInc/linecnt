@@ -129,9 +129,13 @@ EOL                  \r\n|\r|\n
  /* 
   * We need to match trailing lines at the end of the file, but the <<EOF>> rule 
   * does not accept patterns, so we need to maintain a state per pattern we want 
-  * to recohnize. Flex v2.5.37 on Linux matches {EOL} rules above at the end of 
-  * the file, so some of the rules below will not fire on Linux.
-  *
+  * to recohnize.
+  * 
+  * vi adds an extra LF character at the end of any text file it saves, but does
+  * not count this empty line as such. When a file edited in vi is parsed by this 
+  * lexer, the total number of lines for this file will be reported one more than 
+  * vi shows as a line count. This is not a bug.
+  * 
   * The state should be reset back to INITIAL at the end of the file because Flex 
   * does not do it automatically when opening a new file.
   *
