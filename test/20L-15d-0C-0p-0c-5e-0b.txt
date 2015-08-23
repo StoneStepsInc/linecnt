@@ -1,0 +1,19 @@
+"text // text"
+    "text // text"
+code "text // text"
+
+'text // text'
+    'text // text'
+code 'text // text'
+
+"text ' text"
+    "text ' text"
+code "text ' text"
+
+"text /* text */ text"
+    "text /* text */ text"
+code "text /* text */ text"
+
+'text /* text */ text'
+    'text /* text */ text'
+code 'text /* text */ text'
