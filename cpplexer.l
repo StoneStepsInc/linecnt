@@ -9,6 +9,7 @@
 %option batch
 %option never-interactive
 %option 8bit
+%option nounistd
 
 WS                   [\x09\x0B\x0C\x0E-\x20]
 CODE                 [^\x09\x0B\x0C\x0E-\x20\r\n]
