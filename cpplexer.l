@@ -5,11 +5,11 @@
 
     See COPYING and Copyright files for additional licensing and copyright information
 */
-%option noyywrap
-%option batch
-%option never-interactive
-%option 8bit
-%option nounistd
+%option noyywrap              /* never call yywrap() to check if there's more input    */
+%option batch                 /* never run interactively                               */
+%option never-interactive     /* never read one character at a time (as if from TTY)   */
+%option 8bit                  /* all eight bits are significant in all characters      */
+%option nounistd              /* do not include unistd.h                               */
 
 WS                   [\x09\x0B\x0C\x0E-\x20]
 CODE                 [^\x09\x0B\x0C\x0E-\x20\r\n]
@@ -40,8 +40,8 @@ EOL                  \r\n|\r|\n
 %x c_comment_open
 %x code_c_comment_open
 
-%x lws
-%x lbr
+%x lws                                 /* leading whitespace   */
+%x lbr                                 /* brace-only line      */
 
 /*
  * Define start conditions for single- and double-quote strings, so we can skip 
@@ -51,6 +51,9 @@ EOL                  \r\n|\r|\n
  *
  *   const char *url = "http://localhost/"
  *
+ * Both types of strings are considered code, which means that we only need to 
+ * track whether we saw any C comments prior to encountering the opening quote 
+ * of a string.
  */
 %x dqstr
 %x dqstr_c_comment
@@ -70,7 +73,7 @@ EOL                  \r\n|\r|\n
   /* check for leading single brace surrounded by optional whitespace */
 ^{WS}*[\{\}]{WS}*                         BEGIN(lbr);
 
-  /* a string is considered as code, so we only need to track if we saw C comments */
+  /* a string is considered code, so we only need to track if we saw C comments */
 <INITIAL,lws,lbr,code>\"                  BEGIN(dqstr);
 <c_comment,code_c_comment>\"              BEGIN(dqstr_c_comment);
 <INITIAL,lws,lbr,code>\'                  BEGIN(sqstr);
