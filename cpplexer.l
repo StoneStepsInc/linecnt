@@ -5,11 +5,19 @@
 
     See COPYING and Copyright files for additional licensing and copyright information
 */
-%option noyywrap              /* never call yywrap() to check if there's more input    */
-%option batch                 /* never run interactively                               */
-%option never-interactive     /* never read one character at a time (as if from TTY)   */
-%option 8bit                  /* all eight bits are significant in all characters      */
-%option nounistd              /* do not include unistd.h                               */
+
+/*
+ * noyywrap                never call yywrap() to check if there's more input
+ * batch                   optimize for a batch run
+ * never-interactive       never read one character at a time (as if from TTY)
+ * 8bit                    all eight bits are significant in all characters
+ * nounistd                do not include unistd.h
+ */
+%option noyywrap
+%option batch
+%option never-interactive
+%option 8bit
+%option nounistd
 
 WS                   [\x09\x0B\x0C\x0E-\x20]
 CODE                 [^\x09\x0B\x0C\x0E-\x20\r\n]
@@ -40,11 +48,16 @@ EOL                  \r\n|\r|\n
 %x c_comment_open
 %x code_c_comment_open
 
-%x lws                                 /* leading whitespace   */
-%x lbr                                 /* brace-only line      */
+%x BOL
+
+/* leading whitespace */
+%x lws
+
+/* brace-only line */
+%x lbr
 
 /*
- * Define start conditions for single- and double-quote strings, so we can skip 
+ * Define scanner states for single- and double-quote strings, so we can skip 
  * string characters that would be interpreted otherwise. For example, this C++ 
  * string literal could be counted as a C++ comment unless string characters are 
  * ignored:
@@ -68,15 +81,15 @@ EOL                  \r\n|\r|\n
 %%
 
   /* check for leading whitespace */
-^{WS}+                                    BEGIN(lws);
+<INITIAL,BOL>^{WS}+                       BEGIN(lws);
 
   /* check for leading single brace surrounded by optional whitespace */
-^{WS}*[\{\}]{WS}*                         BEGIN(lbr);
+<INITIAL,BOL>^{WS}*[\{\}]{WS}*            BEGIN(lbr);
 
   /* a string is considered code, so we only need to track if we saw C comments */
-<INITIAL,lws,lbr,code>\"                  BEGIN(dqstr);
+<INITIAL,BOL,lws,lbr,code>\"              BEGIN(dqstr);
 <c_comment,code_c_comment>\"              BEGIN(dqstr_c_comment);
-<INITIAL,lws,lbr,code>\'                  BEGIN(sqstr);
+<INITIAL,BOL,lws,lbr,code>\'              BEGIN(sqstr);
 <c_comment,code_c_comment>\'              BEGIN(sqstr_c_comment);
 
   /* ignore the '\' character followed by new-line */
@@ -88,33 +101,33 @@ EOL                  \r\n|\r|\n
 <sqstr,sqstr_c_comment>\\.
 
   /* count lines with unterminiated strings (shouldn't happen in compilable code) */
-<dqstr>{EOL}                                BEGIN(INITIAL); return TOKEN_CODE_EOL;
-<dqstr_c_comment>{EOL}                      BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
-<sqstr>{EOL}                                BEGIN(INITIAL); return TOKEN_CODE_EOL;
-<sqstr_c_comment>{EOL}                      BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
+<dqstr>{EOL}                              BEGIN(BOL); return TOKEN_CODE_EOL;
+<dqstr_c_comment>{EOL}                    BEGIN(BOL); return TOKEN_CODE_C_COMMENT_EOL;
+<sqstr>{EOL}                              BEGIN(BOL); return TOKEN_CODE_EOL;
+<sqstr_c_comment>{EOL}                    BEGIN(BOL); return TOKEN_CODE_C_COMMENT_EOL;
 
   /* ignore all other string characters (must be after all the patterns above) */
 <dqstr,dqstr_c_comment>[^\"]
 <sqstr,sqstr_c_comment>[^\']
 
   /* end the string and enter the code state based on whether we saw any C comments */
-<dqstr>\"                                   BEGIN(code);
-<dqstr_c_comment>\"                         BEGIN(code_c_comment);
-<sqstr>\'                                   BEGIN(code);
-<sqstr_c_comment>\'                         BEGIN(code_c_comment);
+<dqstr>\"                                 BEGIN(code);
+<dqstr_c_comment>\"                       BEGIN(code_c_comment);
+<sqstr>\'                                 BEGIN(code);
+<sqstr_c_comment>\'                       BEGIN(code_c_comment);
 
   /* count an empty line */
-^{EOL}                                    BEGIN(INITIAL); return TOKEN_EMPTY_LINE;
-<lws>{EOL}                                BEGIN(INITIAL); return TOKEN_EMPTY_LINE;
+<INITIAL,BOL>^{EOL}                       BEGIN(BOL); return TOKEN_EMPTY_LINE;
+<lws>{EOL}                                BEGIN(BOL); return TOKEN_EMPTY_LINE;
 
   /* count a brace-only line */
-<lbr>{EOL}                                BEGIN(INITIAL); return TOKEN_BRACE_LINE;
+<lbr>{EOL}                                BEGIN(BOL); return TOKEN_BRACE_LINE;
 
   /* enter code state if we matched any non-whitespace characters */
-<INITIAL,lws,lbr>{CODE}                   BEGIN(code);
+<INITIAL,BOL,lws,lbr>{CODE}               BEGIN(code);
 
   /* enter the C++ comment state */
-<INITIAL,lws,lbr>{CPP_COMMENT}            BEGIN(cpp_comment);
+<INITIAL,BOL,lws,lbr>{CPP_COMMENT}        BEGIN(cpp_comment);
 <code>{CPP_COMMENT}                       BEGIN(code_cpp_comment);
 <code_c_comment>{CPP_COMMENT}             BEGIN(code_c_cpp_comment);
 <c_comment>{CPP_COMMENT}                  BEGIN(c_cpp_comment);
@@ -123,28 +136,28 @@ EOL                  \r\n|\r|\n
 <c_comment>{CODE}                         BEGIN(code_c_comment);
 
   /* count the code line and reset the state */
-<code>{EOL}                               BEGIN(INITIAL); return TOKEN_CODE_EOL;
+<code>{EOL}                               BEGIN(BOL); return TOKEN_CODE_EOL;
 
   /* count a line that contains a closed C comment and reset the state */
-<c_comment>{EOL}                          BEGIN(INITIAL); return TOKEN_C_COMMENT_EOL;
+<c_comment>{EOL}                          BEGIN(BOL); return TOKEN_C_COMMENT_EOL;
 
   /* count a line with an open C comment */
 <c_comment_open>{EOL}                     return TOKEN_C_COMMENT_EOL;
 
   /* count a line that contains some code and a closed C comment and reset the state */
-<code_c_comment>{EOL}                     BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
+<code_c_comment>{EOL}                     BEGIN(BOL); return TOKEN_CODE_C_COMMENT_EOL;
 
   /* count a line with some code and an open C comment */
 <code_c_comment_open>{EOL}                return TOKEN_CODE_C_COMMENT_EOL;
 
   /* count a C++ comment line and reset the state because C++ comments always end lines */
-<cpp_comment>.*{EOL}                      BEGIN(INITIAL); return TOKEN_CPP_COMMENT_EOL;
-<code_cpp_comment>.*{EOL}                 BEGIN(INITIAL); return TOKEN_CODE_CPP_COMMENT_EOL;
-<code_c_cpp_comment>.*{EOL}               BEGIN(INITIAL); return TOKEN_CODE_C_CPP_COMMENT_EOL;
-<c_cpp_comment>.*{EOL}                    BEGIN(INITIAL); return TOKEN_C_CPP_COMMENT_EOL;
+<cpp_comment>.*{EOL}                      BEGIN(BOL); return TOKEN_CPP_COMMENT_EOL;
+<code_cpp_comment>.*{EOL}                 BEGIN(BOL); return TOKEN_CODE_CPP_COMMENT_EOL;
+<code_c_cpp_comment>.*{EOL}               BEGIN(BOL); return TOKEN_CODE_C_CPP_COMMENT_EOL;
+<c_cpp_comment>.*{EOL}                    BEGIN(BOL); return TOKEN_C_CPP_COMMENT_EOL;
 
   /* enter an open C comment state that reflects whether we saw some code or not */
-<INITIAL,lws,lbr,c_comment>{C_COMMENT_START}      BEGIN(c_comment_open);
+<INITIAL,BOL,lws,lbr,c_comment>{C_COMMENT_START}      BEGIN(c_comment_open);
 <code,code_c_comment>{C_COMMENT_START}    BEGIN(code_c_comment_open);
 
   /* close an open C comment and enter the state that reflects whether we saw some code or not */
@@ -164,10 +177,11 @@ EOL                  \r\n|\r|\n
   * The state should be reset back to INITIAL at the end of the file because Flex 
   * does not do it automatically when opening a new file.
   *
-  * Note that unqualified <<EOF>> applies to all start conditions.
+  * Note that unqualified <<EOF>> applies to all states.
   */
 
-<INITIAL,lws><<EOF>>                      BEGIN(INITIAL); return TOKEN_EMPTY_LINE + TOKEN_EOF;
+<INITIAL><<EOF>>                          BEGIN(INITIAL); return TOKEN_EOF;
+<BOL,lws><<EOF>>                          BEGIN(INITIAL); return TOKEN_EMPTY_LINE + TOKEN_EOF;
 
 <lbr><<EOF>>                              BEGIN(INITIAL); return TOKEN_BRACE_LINE + TOKEN_EOF;
 
@@ -184,10 +198,10 @@ EOL                  \r\n|\r|\n
 <code_c_comment_open><<EOF>>              BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF;
 
   /* count lines with unterminiated strings (shouldn't happen in compilable code) */
-<dqstr><<EOF>>                              BEGIN(INITIAL); return TOKEN_CODE_EOL;
-<dqstr_c_comment><<EOF>>                    BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
-<sqstr><<EOF>>                              BEGIN(INITIAL); return TOKEN_CODE_EOL;
-<sqstr_c_comment><<EOF>>                    BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
+<dqstr><<EOF>>                            BEGIN(INITIAL); return TOKEN_CODE_EOL;
+<dqstr_c_comment><<EOF>>                  BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
+<sqstr><<EOF>>                            BEGIN(INITIAL); return TOKEN_CODE_EOL;
+<sqstr_c_comment><<EOF>>                  BEGIN(INITIAL); return TOKEN_CODE_C_COMMENT_EOL;
 
   /* discard any other characters in any state */
 <*>.

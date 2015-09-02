@@ -97,7 +97,6 @@ bool ParseSourceFile(const char *filename)
    int linecnt = 0, cmntcnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0, bracecnt = 0, emptycnt = 0;
    int token1;
    FILE *srcfile;
-   char temp;
 
    if(filename == NULL)
       return false;
@@ -110,88 +109,78 @@ bool ParseSourceFile(const char *filename)
    }
 
    //
-   //   Initialize Flex's input
+   // Initialize Flex's input
    //
    CppFlexLexer lexer1(srcfile);
 
    //
-   //   Check if the file's empty
+   // Run the source file through Flex
    //
-   if(fread(&temp, 1, 1, srcfile) == -1)
-      return false;
-
-   if(feof(srcfile) == false) {
-      rewind(srcfile);
-
-      //
-      //   Parse the input
-      //
-      linecnt = 0; 
-      if((token1 = lexer1.yylex()) != TOKEN_EOF) {
-         do {
-            switch (token1) {
-               case TOKEN_EMPTY_LINE:
-               case TOKEN_EMPTY_LINE + TOKEN_EOF:
-                  linecnt++;
-                  emptycnt++;
-                  break;
-               case TOKEN_BRACE_LINE:
-               case TOKEN_BRACE_LINE + TOKEN_EOF:
-                  linecnt++;
-                  bracecnt++;
-                  break;
-               case TOKEN_CODE_EOL:
-               case TOKEN_CODE_EOL + TOKEN_EOF:
-                  linecnt++;
-                  codecnt++;
-                  break;
-               case TOKEN_C_COMMENT_EOL:
-               case TOKEN_C_COMMENT_EOL + TOKEN_EOF:
-                  linecnt++;
-                  ccnt++;
-                  cmntcnt++;
-                  break;
-               case TOKEN_CPP_COMMENT_EOL:
-               case TOKEN_CPP_COMMENT_EOL + TOKEN_EOF:
-                  linecnt++;
-                  cppcnt++;
-                  cmntcnt++;
-                  break;
-               case TOKEN_C_CPP_COMMENT_EOL:
-               case TOKEN_C_CPP_COMMENT_EOL + TOKEN_EOF:
-                  linecnt++;
-                  cppcnt++;
-                  ccnt++;
-                  cmntcnt++;
-                  break;
-               case TOKEN_CODE_C_COMMENT_EOL:
-               case TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF:
-                  linecnt++;
-                  ccnt++;
-                  codecnt++;
-                  cmntcnt++;
-                  break;
-               case TOKEN_CODE_CPP_COMMENT_EOL:
-               case TOKEN_CODE_CPP_COMMENT_EOL + TOKEN_EOF:
-                  linecnt++;
-                  cppcnt++;
-                  codecnt++;
-                  cmntcnt++;
-                  break;
-               case TOKEN_CODE_C_CPP_COMMENT_EOL:
-               case TOKEN_CODE_C_CPP_COMMENT_EOL + TOKEN_EOF:
-                  linecnt++;
-                  ccnt++;
-                  cppcnt++;
-                  codecnt++;
-                  cmntcnt++;
-                  break;
-               default:
-                  printf("Unknown token: %s at %d\n", lexer1.YYText(), LineCount+linecnt);
-                  break;
-            }
-         } while(token1 < TOKEN_EOF && ((token1 = lexer1.yylex()) != TOKEN_EOF));
-      }
+   linecnt = 0; 
+   if((token1 = lexer1.yylex()) != TOKEN_EOF) {
+      do {
+         switch (token1) {
+            case TOKEN_EMPTY_LINE:
+            case TOKEN_EMPTY_LINE + TOKEN_EOF:
+               linecnt++;
+               emptycnt++;
+               break;
+            case TOKEN_BRACE_LINE:
+            case TOKEN_BRACE_LINE + TOKEN_EOF:
+               linecnt++;
+               bracecnt++;
+               break;
+            case TOKEN_CODE_EOL:
+            case TOKEN_CODE_EOL + TOKEN_EOF:
+               linecnt++;
+               codecnt++;
+               break;
+            case TOKEN_C_COMMENT_EOL:
+            case TOKEN_C_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               ccnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_CPP_COMMENT_EOL:
+            case TOKEN_CPP_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               cppcnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_C_CPP_COMMENT_EOL:
+            case TOKEN_C_CPP_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               cppcnt++;
+               ccnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_CODE_C_COMMENT_EOL:
+            case TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               ccnt++;
+               codecnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_CODE_CPP_COMMENT_EOL:
+            case TOKEN_CODE_CPP_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               cppcnt++;
+               codecnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_CODE_C_CPP_COMMENT_EOL:
+            case TOKEN_CODE_C_CPP_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               ccnt++;
+               cppcnt++;
+               codecnt++;
+               cmntcnt++;
+               break;
+            default:
+               printf("Unknown token: %s at %d\n", lexer1.YYText(), LineCount+linecnt);
+               break;
+         }
+      } while(token1 < TOKEN_EOF && ((token1 = lexer1.yylex()) != TOKEN_EOF));
    }
 
    if(VerboseOutput) {
