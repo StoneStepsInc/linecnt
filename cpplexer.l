@@ -54,7 +54,7 @@ EOL                  \r\n|\r|\n
 %x lws
 
 /* brace-only line */
-%x lbr
+%x brl
 
 /*
  * Define scanner states for single- and double-quote strings, so we can skip 
@@ -84,12 +84,12 @@ EOL                  \r\n|\r|\n
 <INITIAL,BOL>^{WS}+                       BEGIN(lws);
 
   /* check for leading single brace surrounded by optional whitespace */
-<INITIAL,BOL>^{WS}*[\{\}]{WS}*            BEGIN(lbr);
+<INITIAL,BOL>^{WS}*[\{\}]{WS}*            BEGIN(brl);
 
   /* a string is considered code, so we only need to track if we saw C comments */
-<INITIAL,BOL,lws,lbr,code>\"              BEGIN(dqstr);
+<INITIAL,BOL,lws,brl,code>\"              BEGIN(dqstr);
 <c_comment,code_c_comment>\"              BEGIN(dqstr_c_comment);
-<INITIAL,BOL,lws,lbr,code>\'              BEGIN(sqstr);
+<INITIAL,BOL,lws,brl,code>\'              BEGIN(sqstr);
 <c_comment,code_c_comment>\'              BEGIN(sqstr_c_comment);
 
   /* ignore the '\' character followed by new-line */
@@ -121,13 +121,13 @@ EOL                  \r\n|\r|\n
 <lws>{EOL}                                BEGIN(BOL); return TOKEN_EMPTY_LINE;
 
   /* count a brace-only line */
-<lbr>{EOL}                                BEGIN(BOL); return TOKEN_BRACE_LINE;
+<brl>{EOL}                                BEGIN(BOL); return TOKEN_BRACE_LINE;
 
   /* enter code state if we matched any non-whitespace characters */
-<INITIAL,BOL,lws,lbr>{CODE}               BEGIN(code);
+<INITIAL,BOL,lws,brl>{CODE}               BEGIN(code);
 
   /* enter the C++ comment state */
-<INITIAL,BOL,lws,lbr>{CPP_COMMENT}        BEGIN(cpp_comment);
+<INITIAL,BOL,lws,brl>{CPP_COMMENT}        BEGIN(cpp_comment);
 <code>{CPP_COMMENT}                       BEGIN(code_cpp_comment);
 <code_c_comment>{CPP_COMMENT}             BEGIN(code_c_cpp_comment);
 <c_comment>{CPP_COMMENT}                  BEGIN(c_cpp_comment);
@@ -157,7 +157,7 @@ EOL                  \r\n|\r|\n
 <c_cpp_comment>.*{EOL}                    BEGIN(BOL); return TOKEN_C_CPP_COMMENT_EOL;
 
   /* enter an open C comment state that reflects whether we saw some code or not */
-<INITIAL,BOL,lws,lbr,c_comment>{C_COMMENT_START}      BEGIN(c_comment_open);
+<INITIAL,BOL,lws,brl,c_comment>{C_COMMENT_START}      BEGIN(c_comment_open);
 <code,code_c_comment>{C_COMMENT_START}    BEGIN(code_c_comment_open);
 
   /* close an open C comment and enter the state that reflects whether we saw some code or not */
@@ -183,7 +183,7 @@ EOL                  \r\n|\r|\n
 <INITIAL><<EOF>>                          BEGIN(INITIAL); return TOKEN_EOF;
 <BOL,lws><<EOF>>                          BEGIN(INITIAL); return TOKEN_EMPTY_LINE + TOKEN_EOF;
 
-<lbr><<EOF>>                              BEGIN(INITIAL); return TOKEN_BRACE_LINE + TOKEN_EOF;
+<brl><<EOF>>                              BEGIN(INITIAL); return TOKEN_BRACE_LINE + TOKEN_EOF;
 
 <code><<EOF>>                             BEGIN(INITIAL); return TOKEN_CODE_EOL + TOKEN_EOF;
 <c_comment><<EOF>>                        BEGIN(INITIAL); return TOKEN_C_COMMENT_EOL + TOKEN_EOF;
