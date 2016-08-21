@@ -476,25 +476,35 @@ void PrintWarranty(void)
 //
 //
 //
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
    const char *dirname = NULL;
-   char **argptr = &argv[0];
+   const char * const *argptr = &argv[0];
    int comments = 0;
 
    PrintCopyrightLine();
 
    if(argc > 1) {
-      //
-      //   Skip the executable's name
-      //
+      // skip the executable's name
       argptr++;
 
       while(*argptr) {
          if(strchr("-/", **argptr)) {
             switch((*argptr)[1]) {
                case 'd':
-                  dirname = *(++argptr);
+                  // check if a directory follows -d without a space
+                  if(*(*argptr+2))
+                     dirname = *argptr+2;
+                  else {
+                     // otherwise check the next argument
+                     dirname = *(++argptr);
+
+                     // make sure we have a directory
+                     if(!dirname) {
+                        printf("You must supply a directory to start in\n");
+                        exit(-1);
+                     }
+                  }
                   break;
                case 's':
                   WalkTree = true;
