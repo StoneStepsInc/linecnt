@@ -9,4 +9,9 @@ syntax: regexp
 ^linecnt\.v12\.suo$
 ^linecnt\.vcxproj\.user$
 
+# Visual Studio 2015 auto-generated files
+^\.vs/
+^linecnt\.VC\.db$
+^linecnt\.VC\.VC\.opendb$
+
 ^cpplexer\.inc$
