@@ -26,6 +26,7 @@
 #include <stack>
 #include <set>
 #include <string>
+#include <exception>
 
 #include "cpplexer_decl.h"
 #include "version.h"
@@ -57,6 +58,9 @@ struct less_stricmp {
       return stricmp(str1.c_str(), str2.c_str()) < 0 ? true : false;
    }
 };
+
+// storage for the current directory if none was specified on the command line
+static char cur_dir[_MAX_PATH];
 
 //
 // Various counters
@@ -380,18 +384,9 @@ bool ProcessDirectory(const char *dirname)
 {
    std::set<std::string> files;
    std::set<std::string> subdirs;
-   char buffer[_MAX_PATH];
 
-   if(dirname && *dirname)   {
-      if(chdir(dirname) != 0) {
-         printf("Can't change directory to %s\n", dirname);
-         return false;
-      }
-   }
-   else {
-      getcwd(buffer, sizeof(buffer));
-      dirname = buffer;
-   }
+   if(!dirname || !*dirname)
+      throw std::exception("Directory name cannot be empty");
 
    EnumCurrentDir(files, subdirs);
 
@@ -482,6 +477,7 @@ int main(int argc, const char *argv[])
    const char * const *argptr = &argv[0];
    int comments = 0;
 
+   try {
    PrintCopyrightLine();
 
    if(argc > 1) {
@@ -556,6 +552,15 @@ int main(int argc, const char *argv[])
    //
    PrintFileExtensions("Processing files with extensions %s\n\n", ExtList);
 
+   // use the current directory if none was provided on the command line
+   if(!dirname || !*dirname)   {
+      if(!getcwd(cur_dir, sizeof(cur_dir))) {
+         printf("Cannot obtain the current working directory\n");
+         exit(-2);
+      }
+      dirname = cur_dir;
+   }
+
    if(ProcessDirectory(dirname) == false) 
       exit(-2);
 
@@ -586,5 +591,10 @@ int main(int argc, const char *argv[])
    printf("\n");
 
    return 0;
+   }
+   catch (const std::exception& ex) {
+      printf("Unexpected error (%s)\n", ex.what());
+      return 1;
+   }
 }
 
