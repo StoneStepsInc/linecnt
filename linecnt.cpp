@@ -498,7 +498,7 @@ int main(int argc, const char *argv[])
                         // make sure we have a directory
                         if(!dirname) {
                            printf("You must supply a directory to start in\n");
-                           exit(-1);
+                           exit(1);
                         }
                      }
                      break;
@@ -531,7 +531,7 @@ int main(int argc, const char *argv[])
                   default:
                      printf("Unknown option: %s\n\n", *argptr);
                      PrintUsage();
-                     exit(-1);
+                     exit(1);
                }
                argptr++;
                continue;
@@ -544,7 +544,7 @@ int main(int argc, const char *argv[])
       if(ExtList.size() == 0) {
          printf("The extension list is empty. At least one extension must be specified.\n\n");
          PrintUsage();
-         exit(-1);
+         exit(1);
       }
 
       //
@@ -556,13 +556,13 @@ int main(int argc, const char *argv[])
       if(!dirname || !*dirname)   {
          if(!getcwd(cur_dir, sizeof(cur_dir))) {
             printf("Cannot obtain the current working directory\n");
-            exit(-2);
+            exit(2);
          }
          dirname = cur_dir;
       }
 
       if(ProcessDirectory(dirname) == false) 
-         exit(-2);
+         exit(2);
 
       //
       //
