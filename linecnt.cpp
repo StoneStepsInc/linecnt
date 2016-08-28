@@ -6,8 +6,6 @@
     See COPYING and Copyright files for additional licensing and copyright information
 */
 #if defined(_WIN32)
-#define STRICT
-#include <windows.h>
 #include <io.h>
 #include <direct.h>
 #else
