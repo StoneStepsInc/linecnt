@@ -478,119 +478,119 @@ int main(int argc, const char *argv[])
    int comments = 0;
 
    try {
-   PrintCopyrightLine();
+      PrintCopyrightLine();
 
-   if(argc > 1) {
-      // skip the executable's name
-      argptr++;
+      if(argc > 1) {
+         // skip the executable's name
+         argptr++;
 
-      while(*argptr) {
-         if(strchr("-/", **argptr)) {
-            switch((*argptr)[1]) {
-               case 'd':
-                  // check if a directory follows -d without a space
-                  if(*(*argptr+2))
-                     dirname = *argptr+2;
-                  else {
-                     // otherwise check the next argument
-                     dirname = *(++argptr);
+         while(*argptr) {
+            if(strchr("-/", **argptr)) {
+               switch((*argptr)[1]) {
+                  case 'd':
+                     // check if a directory follows -d without a space
+                     if(*(*argptr+2))
+                        dirname = *argptr+2;
+                     else {
+                        // otherwise check the next argument
+                        dirname = *(++argptr);
 
-                     // make sure we have a directory
-                     if(!dirname) {
-                        printf("You must supply a directory to start in\n");
-                        exit(-1);
+                        // make sure we have a directory
+                        if(!dirname) {
+                           printf("You must supply a directory to start in\n");
+                           exit(-1);
+                        }
                      }
-                  }
-                  break;
-               case 's':
-                  WalkTree = true;
-                  break;
-               case 'c':
-                  ExtList.insert("cpp");
-                  ExtList.insert("cxx");
-                  ExtList.insert("hpp");
-                  ExtList.insert("h");
-                  ExtList.insert("c");
-                  break;
-               case 'j':
-                  ExtList.insert("java");
-                  break;
-               case 'v':
-                  VerboseOutput = true;
-                  break;
-               case 'V':
-                  PrintVersion();
-                  exit(0);
-               case 'W':
-                  PrintWarranty();
-                  exit(0);
-               case 'h':
-               case '?':
-                  PrintUsage();
-                  exit(0);
-               default:
-                  printf("Unknown option: %s\n\n", *argptr);
-                  PrintUsage();
-                  exit(-1);
+                     break;
+                  case 's':
+                     WalkTree = true;
+                     break;
+                  case 'c':
+                     ExtList.insert("cpp");
+                     ExtList.insert("cxx");
+                     ExtList.insert("hpp");
+                     ExtList.insert("h");
+                     ExtList.insert("c");
+                     break;
+                  case 'j':
+                     ExtList.insert("java");
+                     break;
+                  case 'v':
+                     VerboseOutput = true;
+                     break;
+                  case 'V':
+                     PrintVersion();
+                     exit(0);
+                  case 'W':
+                     PrintWarranty();
+                     exit(0);
+                  case 'h':
+                  case '?':
+                     PrintUsage();
+                     exit(0);
+                  default:
+                     printf("Unknown option: %s\n\n", *argptr);
+                     PrintUsage();
+                     exit(-1);
+               }
+               argptr++;
+               continue;
             }
-            argptr++;
-            continue;
+
+            ExtList.insert(*argptr++);
          }
-
-         ExtList.insert(*argptr++);
       }
-   }
 
-   if(ExtList.size() == 0) {
-      printf("The extension list is empty. At least one extension must be specified.\n\n");
-      PrintUsage();
-      exit(-1);
-   }
+      if(ExtList.size() == 0) {
+         printf("The extension list is empty. At least one extension must be specified.\n\n");
+         PrintUsage();
+         exit(-1);
+      }
 
-   //
-   //
-   //
-   PrintFileExtensions("Processing files with extensions %s\n\n", ExtList);
+      //
+      //
+      //
+      PrintFileExtensions("Processing files with extensions %s\n\n", ExtList);
 
-   // use the current directory if none was provided on the command line
-   if(!dirname || !*dirname)   {
-      if(!getcwd(cur_dir, sizeof(cur_dir))) {
-         printf("Cannot obtain the current working directory\n");
+      // use the current directory if none was provided on the command line
+      if(!dirname || !*dirname)   {
+         if(!getcwd(cur_dir, sizeof(cur_dir))) {
+            printf("Cannot obtain the current working directory\n");
+            exit(-2);
+         }
+         dirname = cur_dir;
+      }
+
+      if(ProcessDirectory(dirname) == false) 
          exit(-2);
-      }
-      dirname = cur_dir;
-   }
 
-   if(ProcessDirectory(dirname) == false) 
-      exit(-2);
-
-   //
-   //
-   //
-   printf("\n");
-   printf("Processed %d files in %d directories\n", FileCount, DirCount);
-
-   if(LineCount) {
+      //
+      //
+      //
       printf("\n");
-      printf("Total lines            : %d\n", LineCount);
-      printf("Code lines             : %d\n", CodeLineCount);
-      printf("Commented lines        : %d (C++: %d; C: %d)\n", CommentCount, CppLineCount, CLineCount);
-      printf("Empty Lines            : %d\n", EmptyLineCount);
-      printf("Brace Lines            : %d\n", BraceLineCount);
-   }
+      printf("Processed %d files in %d directories\n", FileCount, DirCount);
 
-   if(CommentCount)
-      printf("Code/comments ratio    : %.2f\n", (double) CodeLineCount/CommentCount);
+      if(LineCount) {
+         printf("\n");
+         printf("Total lines            : %d\n", LineCount);
+         printf("Code lines             : %d\n", CodeLineCount);
+         printf("Commented lines        : %d (C++: %d; C: %d)\n", CommentCount, CppLineCount, CLineCount);
+         printf("Empty Lines            : %d\n", EmptyLineCount);
+         printf("Brace Lines            : %d\n", BraceLineCount);
+      }
 
-   if(FileCount) {
-      printf("Source lines per file  : %.2f\n", (double) LineCount/FileCount);
-      printf("Code lines per file    : %.2f\n", (double) CodeLineCount/FileCount);
-      printf("Comment lines per file : %.2f\n", (double) CommentCount/FileCount);
-   }
+      if(CommentCount)
+         printf("Code/comments ratio    : %.2f\n", (double) CodeLineCount/CommentCount);
 
-   printf("\n");
+      if(FileCount) {
+         printf("Source lines per file  : %.2f\n", (double) LineCount/FileCount);
+         printf("Code lines per file    : %.2f\n", (double) CodeLineCount/FileCount);
+         printf("Comment lines per file : %.2f\n", (double) CommentCount/FileCount);
+      }
 
-   return 0;
+      printf("\n");
+
+      return 0;
    }
    catch (const std::exception& ex) {
       printf("Unexpected error (%s)\n", ex.what());
