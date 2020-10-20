@@ -4,9 +4,13 @@
 # VS user settings file
 /linecnt.vcxproj.user
 
+# VS resource compiler output
+/linecnt.aps
+
 # VS build directories
 /Debug/
 /Release/
 
 # generated lexer
 /cpplexer.inc
+
