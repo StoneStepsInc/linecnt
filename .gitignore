@@ -1,0 +1,12 @@
+# VS directory
+/.vs/
+
+# VS user settings file
+/linecnt.vcxproj.user
+
+# VS build directories
+/Debug/
+/Release/
+
+# generated lexer
+/cpplexer.inc
