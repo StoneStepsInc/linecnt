@@ -42,9 +42,9 @@
 // Platform-specific directory name separator
 //
 #if defined(_WIN32)
-#define DIRSEPARATORSTRING "\\"
+#define DIRSEP "\\"
 #else
-#define DIRSEPARATORSTRING "/"
+#define DIRSEP "/"
 #endif
 
 //
@@ -406,7 +406,7 @@ std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& pa
 
    for(iter = pathlist.begin(); iter != pathlist.end(); iter++) {
       path += *iter;
-      path += DIRSEPARATORSTRING;
+      path += DIRSEP;
    }
 
    return path;
