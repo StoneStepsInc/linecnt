@@ -53,7 +53,7 @@
 struct less_stricmp {
    bool operator () (const std::string& str1, const std::string& str2) const
    {
-      return stricmp(str1.c_str(), str2.c_str()) < 0 ? true : false;
+      return stricmp(str1.c_str(), str2.c_str()) < 0;
    }
 };
 
@@ -79,16 +79,7 @@ static bool WalkTree = false;
 // a set of case-insensitive file extensions to process
 static std::set<std::string, less_stricmp>   ExtList;
 
-//
-//
-//
-bool ProcessDirectory(const std::string& dirname);
 void EnumDirectory(const std::string& dirname, std::list<std::string>& files, std::list<std::string>& subdirs);
-void ProcessFileList(const std::string& dirname, const std::list<std::string>& files);
-
-//
-//
-//
 
 ///
 /// @brief  Parses the specified file with a Flex parser and updates
