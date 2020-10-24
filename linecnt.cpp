@@ -320,7 +320,8 @@ bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs
 
    do {
       if(fileinfo.attrib & _A_SUBDIR) {
-         if(!strcmp(fileinfo.name, ".") || !strcmp(fileinfo.name, "..")) 
+         // skip any directory that starts with a period (e.g. ".", "..", ".git", ".vs", etc)
+         if(*fileinfo.name == '.')
             continue;
 
          if(*fileinfo.name)
@@ -356,7 +357,8 @@ bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs
          return false;
 
       if(S_ISDIR(statinfo.st_mode)) {
-         if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) 
+         // skip any directory that starts with a period (e.g. ".", "..", ".git", ".vs", etc)
+         if(*entry->d_name == '.')
             continue;
 
          if(*entry->d_name)
