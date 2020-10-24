@@ -404,7 +404,7 @@ void PrintUsage(void)
    printf("  linecnt -c -j inc  ; Count lines in C/C++, Java and .inc files\n");
 }
 
-void PrintFileExtensions(const char *fmt, const std::set<std::string, less_stricmp>& extlist)
+std::string GetFileExtensions(const std::set<std::string, less_stricmp>& extlist)
 {
    std::string extstr;
    std::set<std::string, less_stricmp>::const_iterator iter;
@@ -418,8 +418,7 @@ void PrintFileExtensions(const char *fmt, const std::set<std::string, less_stric
       extstr += (*iter).c_str();
    }
 
-   printf(fmt, extstr.c_str());
-
+   return extstr;
 }
 
 void PrintVersion(void)
@@ -520,7 +519,7 @@ int main(int argc, const char *argv[])
       //
       //
       //
-      PrintFileExtensions("Processing files with extensions %s\n\n", ExtList);
+      printf("Processing files with extensions %s\n\n", GetFileExtensions(ExtList).c_str());
 
       // use the current directory if none was provided on the command line
       if(!dirname || !*dirname)   {
