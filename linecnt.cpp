@@ -25,6 +25,7 @@
 #include <set>
 #include <string>
 #include <stdexcept>
+#include <system_error>
 
 #include "cpplexer_decl.h"
 #include "version.h"
@@ -89,7 +90,7 @@ void ProcessFileList(const std::string& dirname, const std::list<std::string>& f
 //
 //
 
-bool ParseSourceFile(const std::string& dirname, const std::string& filename)
+void ParseSourceFile(const std::string& dirname, const std::string& filename)
 {
    int linecnt = 0, cmntcnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0, bracecnt = 0, emptycnt = 0;
    int token1;
@@ -97,10 +98,8 @@ bool ParseSourceFile(const std::string& dirname, const std::string& filename)
 
    srcfile = fopen((dirname + DIRSEP + filename).c_str(), "r");
 
-   if(srcfile == NULL) {
-      printf("Cannot open file %s (%s)\n", filename.c_str(), _sys_errlist[errno]);
-      return false;
-   }
+   if(srcfile == NULL)
+      throw std::system_error(errno, std::system_category(), filename);
 
    //
    // Initialize Flex's input
@@ -196,8 +195,6 @@ bool ParseSourceFile(const std::string& dirname, const std::string& filename)
    //   Clean up
    //
    fclose(srcfile);
-
-   return true;
 }
 
 void ProcessFileList(const std::string& dirname, const std::list<std::string>& files)
@@ -228,7 +225,7 @@ void ProcessFileList(const std::string& dirname, const std::list<std::string>& f
       printf("\n");
 }
 
-bool ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
+void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
 {
    // processing state of a directory
    struct state_t {
@@ -278,7 +275,7 @@ bool ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
          stack.pop();
 
          if(stack.empty())
-            return true;
+            return;
 
          // check if more directories to process in the parent directory
          subdirs = &stack.top().subdirs;
@@ -287,8 +284,6 @@ bool ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
 
       iter = subdirs->begin();
    }
-
-   return true;
 }
 
 void EnumDirectory(const std::string& dirname, std::list<std::string>& files, std::list<std::string>& subdirs)
@@ -363,7 +358,7 @@ void EnumDirectory(const std::string& dirname, std::list<std::string>& files, st
 #endif
 }
 
-bool ProcessDirectory(const std::string& dirname)
+void ProcessDirectory(const std::string& dirname)
 {
    std::list<std::string> files;
    std::list<std::string> subdirs;
@@ -372,12 +367,8 @@ bool ProcessDirectory(const std::string& dirname)
 
    ProcessFileList(dirname, files);
 
-   if(WalkTree) {
-      if(ProcessDirList(dirname, std::move(subdirs)) == false)
-         return false;
-   }
-
-   return true;
+   if(WalkTree)
+      ProcessDirList(dirname, std::move(subdirs));
 }
 
 void PrintCopyrightLine(void)
@@ -534,8 +525,7 @@ int main(int argc, const char *argv[])
       if(!dirname || !*dirname)
          throw std::runtime_error("Directory name cannot be empty");
 
-      if(ProcessDirectory(dirname) == false) 
-         exit(2);
+      ProcessDirectory(dirname);
 
       //
       //
