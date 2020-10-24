@@ -57,9 +57,6 @@ struct less_stricmp {
    }
 };
 
-// storage for the current directory if none was specified on the command line
-static char cur_dir[_MAX_PATH];
-
 //
 // Various counters
 //
@@ -556,6 +553,7 @@ int main(int argc, const char *argv[])
 
       // use the current directory if none was provided on the command line
       if(!dirname || !*dirname)   {
+         char cur_dir[_MAX_PATH];
          if(!getcwd(cur_dir, sizeof(cur_dir))) {
             printf("Cannot obtain the current working directory\n");
             exit(2);
