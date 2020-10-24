@@ -24,7 +24,7 @@
 #include <stack>
 #include <set>
 #include <string>
-#include <exception>
+#include <stdexcept>
 
 #include "cpplexer_decl.h"
 #include "version.h"
@@ -384,7 +384,7 @@ bool ProcessDirectory(const char *dirname)
    std::set<std::string> subdirs;
 
    if(!dirname || !*dirname)
-      throw std::exception("Directory name cannot be empty");
+      throw std::runtime_error("Directory name cannot be empty");
 
    EnumCurrentDir(files, subdirs);
 
