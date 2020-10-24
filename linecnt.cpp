@@ -414,7 +414,7 @@ std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& pa
 
 void PrintCopyrightLine(void)
 {
-   printf("Copyright 2003-2015, Stone Steps Inc. http://www.stonesteps.ca\n\n");
+   printf("Copyright 2003-2020, Stone Steps Inc. http://www.stonesteps.ca\n\n");
 }
 
 void PrintUsage(void)
