@@ -31,7 +31,6 @@
 
 #if defined(_WIN32)
 #define stricmp _stricmp
-#define chdir _chdir
 #define getcwd _getcwd
 #else
 #define stricmp strcasecmp
@@ -82,28 +81,24 @@ static std::set<std::string, less_stricmp>   ExtList;
 //
 //
 //
-bool ProcessDirectory(const char *dirname);
-bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs);
-std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& path);
-void ProcessFileList(const std::string& dirname, const std::set<std::string>& files);
+bool ProcessDirectory(const std::string& dirname);
+void EnumDirectory(const std::string& dirname, std::list<std::string>& files, std::list<std::string>& subdirs);
+void ProcessFileList(const std::string& dirname, const std::list<std::string>& files);
 
 //
 //
 //
 
-bool ParseSourceFile(const char *filename)
+bool ParseSourceFile(const std::string& dirname, const std::string& filename)
 {
    int linecnt = 0, cmntcnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0, bracecnt = 0, emptycnt = 0;
    int token1;
    FILE *srcfile;
 
-   if(filename == NULL)
-      return false;
-
-   srcfile = fopen(filename, "r");
+   srcfile = fopen((dirname + DIRSEP + filename).c_str(), "r");
 
    if(srcfile == NULL) {
-      printf("Cannot open file %s (%s)\n", filename, _sys_errlist[errno]);
+      printf("Cannot open file %s (%s)\n", filename.c_str(), _sys_errlist[errno]);
       return false;
    }
 
@@ -186,7 +181,7 @@ bool ParseSourceFile(const char *filename)
       char cpp_c_cnt[32];
       // make a shared column for C and C++ commented line counts
       sprintf(cpp_c_cnt, "%d/%d", cppcnt, ccnt); 
-      printf("   %5d  %5d      %5d  %10s  %5d  %5d  %s\n", linecnt, codecnt, cmntcnt, cpp_c_cnt, emptycnt, bracecnt, filename);
+      printf("   %5d  %5d      %5d  %10s  %5d  %5d  %s\n", linecnt, codecnt, cmntcnt, cpp_c_cnt, emptycnt, bracecnt, filename.c_str());
    }
 
    EmptyLineCount += emptycnt;
@@ -205,52 +200,49 @@ bool ParseSourceFile(const char *filename)
    return true;
 }
 
-void ProcessFileList(const std::string& dirname, const std::set<std::string>& files)
+void ProcessFileList(const std::string& dirname, const std::list<std::string>& files)
 {
    bool header = false;
-   const char *filename, *cptr;
-   std::set<std::string>::const_iterator iter;
    int filecnt = 0;
 
    if(files.size() == 0)
       return;
 
-   for(iter = files.begin(); iter != files.end(); iter++) {
-      if((filename = (*iter).c_str()) == NULL)
-         continue;
-
-      if((cptr = strrchr(filename, '.')) == NULL)
-         continue;
-
-      if(ExtList.find(++cptr) != ExtList.end()) {
-         if(VerboseOutput) {
-            if(!header) {
-               printf("Directory: %s\n\n", dirname.c_str());
-               printf("   Lines   Code  Commented     (C++/C)  Empty  Brace\n");
-               printf("  ------ ------ ---------- ----------- ------ ------\n");
-               header = true;
-            }
-
-            filecnt++;
+   for(const std::string& filename : files) {
+      if(VerboseOutput) {
+         if(!header) {
+            printf("Directory: %s\n\n", dirname.c_str());
+            printf("   Lines   Code  Commented     (C++/C)  Empty  Brace\n");
+            printf("  ------ ------ ---------- ----------- ------ ------\n");
+            header = true;
          }
-         ParseSourceFile(filename);
-         FileCount++;
+
+         filecnt++;
       }
+
+      ParseSourceFile(dirname, filename);
+      FileCount++;
    }
 
    if(VerboseOutput && filecnt)
       printf("\n");
 }
 
-bool ProcessDirList(std::set<std::string>& dirs)
+bool ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
 {
-   std::string dirname, temp;
-   std::stack<std::set<std::string>*> stack;
-   std::set<std::string>::iterator iter;
-   std::set<std::string> files;
-   std::list<std::string> pathlist;
+   // processing state of a directory
+   struct state_t {
+      std::list<std::string>  subdirs;    // remaining subdirectories
+      std::string             dirname;    // directory that is being processed
+   };
 
-   std::set<std::string> *subdirs = &dirs;
+   std::string dirpath = basedir;
+   std::stack<state_t> stack;
+   std::list<std::string>::iterator iter;
+
+   stack.push({std::move(dirs), dirpath});
+
+   std::list<std::string> *subdirs = &stack.top().subdirs;
 
    iter = subdirs->begin();
 
@@ -258,46 +250,39 @@ bool ProcessDirList(std::set<std::string>& dirs)
 
       DirCount++;
 
-      dirname = *iter;
-      if(chdir(dirname.c_str()) != 0) {
-         printf("Can't change directory to %s\n", dirname.c_str());
-         return false;
-      }
-      pathlist.push_back(dirname);
+      // add the new directory to the current path
+      dirpath += DIRSEP + *iter;
 
-      //
-      // When saving the current directory list's state, instead of saving
-      // both, the iterator and the list, remove the current item and save
-      // only the list. 
-      //
+      // move the new directory name into the new state
+      stack.push({std::list<std::string>(), std::move(*iter)});
+
+      // and remove the empty directory node from the state list
       subdirs->erase(iter);
-      stack.push(subdirs);
-      subdirs = new std::set<std::string>;
 
-      //
-      // Populate the list with directories and process the files in
-      // the current directory. 
-      //
-      EnumCurrentDir(files, *subdirs);
-      ProcessFileList(GetFullPath(pathlist, temp), files);
+      // and assign the pointer to the new directory list
+      subdirs = &stack.top().subdirs;
+
+      // populate the directory list and the file list for the new directory
+      std::list<std::string> files;
+      EnumDirectory(dirpath, files, *subdirs);
+
+      // and process all files in the current directory
+      ProcessFileList(dirpath, files);
       files.clear();
 
-      //
-      // If the new directory list is empty, delete the list and then
-      // delete every empty list on top of the stack, moving one directory
-      // every time. Note that the top directory wasn't allocated by this
-      // function and shouldn't be deleted. 
-      //
+      // pop all empty directory lists from the stack
       while(subdirs->empty()) {
+         // chop off the current directory from the path, along with the separator
+         dirpath.erase(dirpath.length() - stack.top().dirname.length() - 1);
+
+         stack.pop();
+
          if(stack.empty())
             return true;
 
-         delete subdirs;
+         // check if more directories to process in the parent directory
+         subdirs = &stack.top().subdirs;
 
-         subdirs = stack.top();
-         stack.pop();
-         chdir("..");
-         pathlist.pop_back();
       }
 
       iter = subdirs->begin();
@@ -306,17 +291,20 @@ bool ProcessDirList(std::set<std::string>& dirs)
    return true;
 }
 
-#if defined(_WIN32)
-bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs)
+void EnumDirectory(const std::string& dirname, std::list<std::string>& files, std::list<std::string>& subdirs)
 {
-   struct _finddata_t fileinfo;
-   long fhandle;
-
    files.clear();
    subdirs.clear();
 
-   if((fhandle = _findfirst("*.*", &fileinfo)) == -1)
-      return false;
+#if defined(_WIN32)
+   struct _finddata_t fileinfo;
+   long fhandle;
+
+   // get all files and directories, except current and parent directories
+   std::string dirpat(dirname + DIRSEP + "*.*");
+
+   if((fhandle = _findfirst(dirpat.c_str(), &fileinfo)) == -1)
+      throw std::runtime_error("Cannot enumerate directory: " + dirname);
 
    do {
       if(fileinfo.attrib & _A_SUBDIR) {
@@ -325,36 +313,32 @@ bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs
             continue;
 
          if(*fileinfo.name)
-            subdirs.insert(fileinfo.name);
+            subdirs.push_back(fileinfo.name);
          continue;
       }
 
-      if(*fileinfo.name)
-         files.insert(fileinfo.name);
+      if(*fileinfo.name) {
+         const char *ext = strrchr(fileinfo.name, '.');
+
+         if(ext && ExtList.find(++ext) != ExtList.end())
+            files.push_back(fileinfo.name);
+      }
 
    } while(_findnext(fhandle, &fileinfo) == 0);
 
    _findclose(fhandle);
-
-   return true;
-}
 #else
-bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs)
-{
    DIR *dir;
    struct dirent *entry;
    struct stat statinfo;
 
-   files.clear();
-   subdirs.clear();
-
-   if((dir = opendir(".")) == NULL) 
-      return false;
+   if((dir = opendir(dirname.c_str())) == NULL) 
+      throw std::runtime_error("Cannot open directory: " + dirname);
 
    while ((entry = readdir(dir)) != NULL) {
 
-      if(stat(entry->d_name, &statinfo) == -1)
-         return false;
+      if(stat((dirname + DIRSEP + entry->d_name).c_str(), &statinfo) == -1)
+         throw std::runtime_error("Cannot stat directory: " + dirname);
 
       if(S_ISDIR(statinfo.st_mode)) {
          // skip any directory that starts with a period (e.g. ".", "..", ".git", ".vs", etc)
@@ -362,53 +346,38 @@ bool EnumCurrentDir(std::set<std::string>& files, std::set<std::string>& subdirs
             continue;
 
          if(*entry->d_name)
-            subdirs.insert(entry->d_name);
+            subdirs.push_back(entry->d_name);
          continue;
       }
 
-      if(*entry->d_name)
-         files.insert(entry->d_name);
+      if(*entry->d_name) {
+         const char *ext = strrchr(entry->d_name, '.');
+
+         if(ext && ExtList.find(++ext) != ExtList.end())
+            files.push_back(entry->d_name);
+      }
 
    }
 
    closedir(dir);
-
-   return true;
-}
 #endif
+}
 
-bool ProcessDirectory(const char *dirname)
+bool ProcessDirectory(const std::string& dirname)
 {
-   std::set<std::string> files;
-   std::set<std::string> subdirs;
+   std::list<std::string> files;
+   std::list<std::string> subdirs;
 
-   if(!dirname || !*dirname)
-      throw std::runtime_error("Directory name cannot be empty");
-
-   EnumCurrentDir(files, subdirs);
+   EnumDirectory(dirname, files, subdirs);
 
    ProcessFileList(dirname, files);
 
    if(WalkTree) {
-      if(ProcessDirList(subdirs) == false)
+      if(ProcessDirList(dirname, std::move(subdirs)) == false)
          return false;
    }
 
    return true;
-}
-
-std::string& GetFullPath(const std::list<std::string>& pathlist, std::string& path)
-{
-   std::list<std::string>::const_iterator iter;
-
-   path.erase();
-
-   for(iter = pathlist.begin(); iter != pathlist.end(); iter++) {
-      path += *iter;
-      path += DIRSEP;
-   }
-
-   return path;
 }
 
 void PrintCopyrightLine(void)
@@ -562,6 +531,9 @@ int main(int argc, const char *argv[])
          }
          dirname = cur_dir;
       }
+
+      if(!dirname || !*dirname)
+         throw std::runtime_error("Directory name cannot be empty");
 
       if(ProcessDirectory(dirname) == false) 
          exit(2);
