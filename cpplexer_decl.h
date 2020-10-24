@@ -10,17 +10,20 @@
 
 #include <stdio.h>
 
-//
-//
-//
+///
+/// @brief  Flex parser for counting lines in C++ like languages.
+///
 class CppFlexLexer {
    public:
+      /// Constructs a Flex parser with the specified input and output files.
       CppFlexLexer(FILE* arg_yyin = NULL, FILE* arg_yyout = NULL );
 
       ~CppFlexLexer(void);
-        
+      
+      /// Returns a poiner to the current token string.
       const char *YYText(void);
 
+      /// Returns the next parsed token identifier.
       int yylex(void);
 };
 
@@ -29,7 +32,7 @@ class CppFlexLexer {
 #endif // __CPPLEXER_IMP_CPP
 
 //
-//
+// Lexer token identifiers
 //
 
 #define TOKEN_EMPTY_LINE                     1

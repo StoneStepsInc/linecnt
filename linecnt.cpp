@@ -47,9 +47,9 @@
 #define DIRSEP "/"
 #endif
 
-//
-// Case-insensitive string comparison function
-//
+///
+/// @brief  Case-insensitive string comparison predicate.
+///
 struct less_stricmp {
    bool operator () (const std::string& str1, const std::string& str2) const
    {
@@ -90,6 +90,12 @@ void ProcessFileList(const std::string& dirname, const std::list<std::string>& f
 //
 //
 
+///
+/// @brief  Parses the specified file with a Flex parser and updates
+///         various counters.
+/// 
+/// When running in verbose mode, will print per-file counts.
+///
 void ParseSourceFile(const std::string& dirname, const std::string& filename)
 {
    int linecnt = 0, cmntcnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0, bracecnt = 0, emptycnt = 0;
@@ -197,6 +203,9 @@ void ParseSourceFile(const std::string& dirname, const std::string& filename)
    fclose(srcfile);
 }
 
+///
+/// @brief  Processes all files in `files` in the specified directory.
+/// 
 void ProcessFileList(const std::string& dirname, const std::list<std::string>& files)
 {
    bool header = false;
@@ -224,6 +233,10 @@ void ProcessFileList(const std::string& dirname, const std::list<std::string>& f
    if(VerboseOutput && filecnt)
       printf("\n");
 }
+
+///
+/// @brief  Processes files in `basedir` and all sub-directories in `dirs`.
+///
 
 void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
 {
@@ -285,6 +298,18 @@ void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
       iter = subdirs->begin();
    }
 }
+
+///
+/// @brief  Enumerates files and directories in the specified directory.
+///
+/// Enumerated files and directories are collected in `files` and `subdirs`.
+/// 
+/// Directories whose names begin with a period are skipped (e.g. `.`, `..`
+/// `.git`, `.vs`).
+/// 
+/// Only files with extensions matching those in the extension set are
+/// collected.
+/// 
 
 void EnumDirectory(const std::string& dirname, std::list<std::string>& files, std::list<std::string>& subdirs)
 {
@@ -358,6 +383,9 @@ void EnumDirectory(const std::string& dirname, std::list<std::string>& files, st
 #endif
 }
 
+///
+/// @brief  Processes files in the specified directory and sub-directories.
+///
 void ProcessDirectory(const std::string& dirname)
 {
    std::list<std::string> files;
@@ -371,11 +399,17 @@ void ProcessDirectory(const std::string& dirname)
       ProcessDirList(dirname, std::move(subdirs));
 }
 
+///
+/// @brief  Prints copyright information.
+///
 void PrintCopyrightLine(void)
 {
    printf("Copyright 2003-2020, Stone Steps Inc. http://www.stonesteps.ca\n\n");
 }
 
+///
+/// @brief  Prints application usage information.
+///
 void PrintUsage(void)
 {
    printf("Syntax: linecnt [-s] [-v] [-d dir-name] [-c] [-j] [ext [ext [ ...]]]\n\n");
@@ -395,6 +429,13 @@ void PrintUsage(void)
    printf("  linecnt -c -j inc  ; Count lines in C/C++, Java and .inc files\n");
 }
 
+///
+/// @brief  Returns a string with a comma-separated list of specified
+///         file extensions.
+/// 
+/// Returned extensions are prefixed with a period and the last one is
+/// separated from the rest with `and`.
+///
 std::string GetFileExtensions(const std::set<std::string, less_stricmp>& extlist)
 {
    std::string extstr;
@@ -412,11 +453,17 @@ std::string GetFileExtensions(const std::set<std::string, less_stricmp>& extlist
    return extstr;
 }
 
+///
+/// @brief  Prints application version.
+///
 void PrintVersion(void)
 {
    printf("Version: %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, EDITION_LEVEL);
 }
 
+///
+/// @brief  Prints warranty information.
+///
 void PrintWarranty(void)
 {
    printf("THIS PROGRAM IS DISTRIBUTED ON AN AS-IS BASIS, WITHOUT WARRANTY\n");
@@ -424,9 +471,9 @@ void PrintWarranty(void)
    printf("YOUR OWN RISK.\n");
 }
 
-//
-//
-//
+///
+/// @brief  `linecnt` entry point.
+///
 int main(int argc, const char *argv[])
 {
    const char *dirname = NULL;
@@ -560,4 +607,3 @@ int main(int argc, const char *argv[])
       return 1;
    }
 }
-

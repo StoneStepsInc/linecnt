@@ -13,7 +13,9 @@
 
 #include "cpplexer.inc"
 
-
+///
+/// Both file handles are passed to `yyrestart` verbatim.
+///
 CppFlexLexer::CppFlexLexer(FILE* arg_yyin, FILE* arg_yyout)
 {
    yyrestart(arg_yyin);
