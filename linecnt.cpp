@@ -506,7 +506,11 @@ int main(int argc, const char *argv[])
                   case 'c':
                      ExtList.insert("cpp");
                      ExtList.insert("cxx");
+                     ExtList.insert("cc");
+                     ExtList.insert("c++");
                      ExtList.insert("hpp");
+                     ExtList.insert("hxx");
+                     ExtList.insert("h++");
                      ExtList.insert("h");
                      ExtList.insert("c");
                      break;
