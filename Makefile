@@ -1,69 +1,89 @@
+#
+# linecnt - a source line counting utility
+#
+# Copyright (c) 2003-2020, Stone Steps Inc. (www.stonesteps.ca)
+#
+# See COPYING and Copyright files for additional licensing and copyright information
+#
+
+SHELL := /bin/bash
+
+# delete all default suffixes
 .SUFFIXES:
 
-SRCS = linecnt.cpp cpplexer_imp.cpp
-OBJS = $(SRCS:.cpp=.o)
-LEXERS = cpplexer.l
-LEXERO = $(LEXERS:.l=.inc)
-TARGET = linecnt
+.PHONY: clean
 
-#
-#
-#
+# if there is no build directory supplied, use the default
+ifeq ($(strip $(BLDDIR)),)
+BLDDIR := build
+endif
 
-CCFLAGS = $(CFLAGS) $(CPPFLAGS) -fexceptions
+# source and various derived variables
+SRCS := linecnt.cpp cpplexer_imp.cpp
+OBJS := $(SRCS:.cpp=.o)
+DEPS := $(OBJS:.o=.d)
 
-ifeq ($(findstring -g,$(CFLAGS)),)
-CFLAGS += -O2
+LEX_SRC := cpplexer.l
+LEX_INC := $(LEX_SRC:.l=.inc)
+
+LINECNT := linecnt
+
+# C++ compiler flags
+CXXFLAGS = -std=c++17 -fexceptions -Werror -pedantic
+
+# if there's no debug information, turn on optimizations
+ifeq ($(findstring -g,$(CXXFLAGS)),)
+CXXFLAGS += -O3
 endif
 
 #
-#
-#
-define clean-target
-	@for obj in $(2); do if [[ -e $$obj ]]; then rm $$obj; fi; done
-	@if [[ -e $(1) ]]; then rm $(1); fi
-endef
-
+# targets
 #
 
-define add-depend
-	sed 's/\($(2)\).o[ :]*/\1.o $(1) : /g' > $(1); \
-	[ -s $(1) ] || rm -f $(1)
-endef
+# linecnt
+$(BLDDIR)/$(LINECNT): $(addprefix $(BLDDIR)/,$(OBJS)) | $(BLDDIR)
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lstdc++
+
+$(BLDDIR): 
+	@mkdir $(BLDDIR)
+
+clean:
+	@rm -f $(BLDDIR)/$(LINECNT)
+	@rm -f $(addprefix $(BLDDIR)/, $(OBJS))
+	@rm -f $(addprefix $(BLDDIR)/, $(DEPS))
+	@rm -f $(LEX_INC)
 
 #
+# Dependency tracking fails for the Lexer-generated include file
+# because GCC needs all includ files present when .d files are
+# being generated. GNU Make has some suggestions to solve this
+# on this page:
 #
-%.d : %.cpp
-	set -e; $(CC) -M $(CCFLAGS) $(CXXFLAGS) $(INCLUDES) $< | \
-		$(call add-depend,$@,$*)
+# https://www.gnu.org/software/automake/manual/html_node/Built-Sources-Example.html
+#
+# BUILT_SOURCES only works for phony targets and using cpplexer_imp.o
+# as a target fails because dependencies are being built first and
+# fail. Using Lexer-generated files as a prerequisite of C++ source
+# including them triggers the Lexer rule. We also need to touch the
+# source file to make sure it is recompiled with new Lexer output.
+#
+cpplexer_imp.cpp : $(LEX_INC)
+	touch cpplexer_imp.cpp
 
-%.d : %.c
-	set -e; $(CC) -M $(CCFLAGS) $(INCLUDES) $< | \
-		$(call add-depend,$@,$*)
+$(BLDDIR)/%.d : %.cpp
+	if [[ ! -e $(@D) ]]; then mkdir -p $(@D); fi
+	set -e; $(CC) -MM $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $< | \
+	sed 's|^[ \t]*$*\.o[ \t]*:|$(BLDDIR)/$*.o $@: |g' > $@;
 
-%.o : %.c
-	$(CC) -c -o $@ $(CCFLAGS) $<
-
-%.o : %.cpp
-	$(CC) -c -o $@ $(CCFLAGS) $(CXXFLAGS) $<
+$(BLDDIR)/%.o : %.cpp
+	$(CXX) -c -o $@ $(CXXFLAGS) $(CXXFLAGS) $<
 
 %.inc : %.l
 	$(LEX) -o$@ $<
 
-#
-#
-#
-$(TARGET): $(OBJS)
-	$(CC) -o $@ $^ -lstdc++
-
-clean:
-	$(call clean-target,$(TARGET),$(OBJS))
-	$(call clean-target,no-such-file,$(LEXERO))
-
-
-#
-#
-#
-
-include $(OBJS:.o=.d)
-
+# include dependencies when the primary target is being built
+ifeq ($(MAKECMDGOALS),)
+include $(addprefix $(BLDDIR)/, $(DEPS))
+else ifneq ($(filter $(BLDDIR)/$(LINECNT),$(MAKECMDGOALS)),)
+include $(addprefix $(BLDDIR)/, $(DEPS))
+endif
