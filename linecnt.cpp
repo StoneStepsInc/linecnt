@@ -197,7 +197,7 @@ void ParseSourceFile(const std::string& dirname, const std::string& filename)
 ///
 /// @brief  Processes all files in `files` in the specified directory.
 /// 
-void ProcessFileList(const std::string& dirname, const std::list<std::string>& files)
+void ProcessFileList(const std::string& dirname, std::list<std::string>&& files)
 {
    bool header = false;
    int filecnt = 0;
@@ -223,6 +223,8 @@ void ProcessFileList(const std::string& dirname, const std::list<std::string>& f
 
    if(VerboseOutput && filecnt)
       printf("\n");
+
+   files.clear();
 }
 
 ///
@@ -273,8 +275,7 @@ void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
       EnumDirectory(dirpath, files, *subdirs);
 
       // and process all files in the current directory
-      ProcessFileList(dirpath, files);
-      files.clear();
+      ProcessFileList(dirpath, std::move(files));
 
       // pop all empty directory lists from the stack
       while(subdirs->empty()) {
@@ -397,7 +398,7 @@ void ProcessDirectory(const std::string& dirname)
 
    EnumDirectory(dirname, files, subdirs);
 
-   ProcessFileList(dirname, files);
+   ProcessFileList(dirname, std::move(files));
 
    if(WalkTree)
       ProcessDirList(dirname, std::move(subdirs));
