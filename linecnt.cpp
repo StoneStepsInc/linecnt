@@ -461,7 +461,7 @@ std::string GetFileExtensions(const std::set<std::string, less_stricmp>& extlist
 ///
 void PrintVersion(void)
 {
-   printf("Version: %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, EDITION_LEVEL);
+   printf("Version: %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 }
 
 ///
