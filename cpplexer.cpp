@@ -23,7 +23,7 @@ extern "C" {
 ///
 /// Both file handles are passed to `yyrestart` verbatim.
 ///
-CppFlexLexer::CppFlexLexer(FILE* arg_yyin, FILE* arg_yyout)
+CppFlexLexer::CppFlexLexer(FILE* arg_yyin)
 {
    yyrestart(arg_yyin);
 }
