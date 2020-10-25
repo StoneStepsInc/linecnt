@@ -72,7 +72,7 @@ cpplexer_imp.cpp : $(LEX_INC)
 
 $(BLDDIR)/%.d : %.cpp
 	if [[ ! -e $(@D) ]]; then mkdir -p $(@D); fi
-	set -e; $(CC) -MM $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $< | \
+	set -e; $(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $< | \
 	sed 's|^[ \t]*$*\.o[ \t]*:|$(BLDDIR)/$*.o $@: |g' > $@;
 
 $(BLDDIR)/%.o : %.cpp
