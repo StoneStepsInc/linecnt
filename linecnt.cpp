@@ -95,7 +95,7 @@ void ParseSourceFile(const std::string& dirname, const std::string& filename)
 
    srcfile = fopen((dirname + DIRSEP + filename).c_str(), "r");
 
-   if(srcfile == NULL)
+   if(srcfile == nullptr)
       throw std::system_error(errno, std::system_category(), filename);
 
    //
@@ -355,10 +355,10 @@ void EnumDirectory(const std::string& dirname, std::list<std::string>& files, st
    struct dirent *entry;
    struct stat statinfo;
 
-   if((dir = opendir(dirname.c_str())) == NULL) 
+   if((dir = opendir(dirname.c_str())) == nullptr) 
       throw std::runtime_error("Cannot open directory: " + dirname);
 
-   while ((entry = readdir(dir)) != NULL) {
+   while ((entry = readdir(dir)) != nullptr) {
 
       if(stat((dirname + DIRSEP + entry->d_name).c_str(), &statinfo) == -1)
          throw std::runtime_error("Cannot stat directory: " + dirname);
@@ -479,7 +479,7 @@ void PrintWarranty(void)
 ///
 int main(int argc, const char *argv[])
 {
-   const char *dirname = NULL;
+   const char *dirname = nullptr;
    const char * const *argptr = &argv[0];
    int comments = 0;
 

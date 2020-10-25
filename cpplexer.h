@@ -26,7 +26,7 @@
 class CppFlexLexer {
    public:
       /// Constructs a Flex scanner with the specified input and output files.
-      CppFlexLexer(FILE* arg_yyin = NULL, FILE* arg_yyout = NULL);
+      CppFlexLexer(FILE* arg_yyin = nullptr, FILE* arg_yyout = nullptr);
 
       ~CppFlexLexer(void);
       
