@@ -8,8 +8,8 @@
 /linecnt.aps
 
 # VS build directories
-/Debug/
-/Release/
+/x64/Debug/
+/x64/Release/
 
 # generated lexer
 /cpplexer.inc

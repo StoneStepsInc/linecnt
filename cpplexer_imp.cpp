@@ -11,7 +11,9 @@
 //
 //
 
+extern "C" {
 #include "cpplexer.inc"
+}
 
 ///
 /// Both file handles are passed to `yyrestart` verbatim.

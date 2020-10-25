@@ -230,7 +230,6 @@ void ProcessFileList(const std::string& dirname, std::list<std::string>&& files)
 ///
 /// @brief  Processes files in `basedir` and all sub-directories in `dirs`.
 ///
-
 void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
 {
    // processing state of a directory
@@ -315,7 +314,6 @@ void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
 /// Only files with extensions matching those in the extension set are
 /// collected.
 /// 
-
 void EnumDirectory(const std::string& dirname, std::list<std::string>& files, std::list<std::string>& subdirs)
 {
    files.clear();
@@ -323,7 +321,7 @@ void EnumDirectory(const std::string& dirname, std::list<std::string>& files, st
 
 #if defined(_WIN32)
    struct _finddata_t fileinfo;
-   long fhandle;
+   intptr_t fhandle;
 
    // get all files and directories, except current and parent directories
    std::string dirpat(dirname + DIRSEP + "*.*");
