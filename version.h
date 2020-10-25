@@ -1,5 +1,5 @@
-#ifndef __VERSION_H
-#define __VERSION_H
+#ifndef LINECNT_VERSION_H
+#define LINECNT_VERSION_H
 
 #define VERSION_MAJOR           2
 #define VERSION_MINOR           0
