@@ -233,7 +233,7 @@ void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
 {
    // processing state of a directory
    struct state_t {
-      std::list<std::string>  subdirs;    // remaining subdirectories
+      std::list<std::string>  subdirs;    // sub-directory names, no separators, under dirname
       std::string             dirname;    // directory that is being processed
    };
 
@@ -241,6 +241,11 @@ void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
    std::stack<state_t> stack;
    std::list<std::string>::iterator iter;
 
+   //
+   // Use the top state for the base directory and its sub-directories.
+   // It's worth noting that unlike other states, dirname in this one
+   // is a path and not just a name.
+   //
    stack.push({std::move(dirs), dirpath});
 
    std::list<std::string> *subdirs = &stack.top().subdirs;
@@ -273,8 +278,16 @@ void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
 
       // pop all empty directory lists from the stack
       while(subdirs->empty()) {
-         // chop off the current directory from the path, along with the separator
-         dirpath.erase(dirpath.length() - stack.top().dirname.length() - 1);
+         //
+         // The first stack frame contains the base directory and should not
+         // be erased below because its pattern doesn't follow the pattern
+         // of enumerated child directories, which is a separator followed
+         // by a directory name.
+         //
+         if(stack.size() > 1) {
+            // chop off the current directory from the path, along with the separator
+            dirpath.erase(dirpath.length() - stack.top().dirname.length() - 1);
+         }
 
          stack.pop();
 
