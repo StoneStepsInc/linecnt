@@ -5,34 +5,11 @@
 
     See COPYING and Copyright files for additional licensing and copyright information
 */
-#ifndef __CPPLEXER_DECL_H
-#define __CPPLEXER_DECL_H
-
-#include <stdio.h>
-
-///
-/// @brief  Flex parser for counting lines in C++ like languages.
-///
-class CppFlexLexer {
-   public:
-      /// Constructs a Flex parser with the specified input and output files.
-      CppFlexLexer(FILE* arg_yyin = NULL, FILE* arg_yyout = NULL );
-
-      ~CppFlexLexer(void);
-      
-      /// Returns a poiner to the current token string.
-      const char *YYText(void);
-
-      /// Returns the next parsed token identifier.
-      int yylex(void);
-};
-
-#ifndef __CPPLEXER_IMP_CPP
-#undef yyFlexLexer
-#endif // __CPPLEXER_IMP_CPP
+#ifndef CPPLEXER_SCANNER_H
+#define CPPLEXER_SCANNER_H
 
 //
-// Lexer token identifiers
+// CppFlexLexer token identifiers
 //
 
 #define TOKEN_EMPTY_LINE                     1
@@ -48,5 +25,4 @@ class CppFlexLexer {
 
 #define TOKEN_EOF                            1000
 
-#endif // __CPPLEXER_DECL_H
-
+#endif // CPPLEXER_SCANNER_H

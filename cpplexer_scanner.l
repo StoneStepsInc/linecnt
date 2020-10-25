@@ -75,7 +75,7 @@ EOL                  \r\n|\r|\n
 %x sqstr_c_comment
 
 %{
-#include "cpplexer_decl.h"
+#include "cpplexer_scanner.h"
 %}
 
 %%

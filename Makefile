@@ -19,11 +19,11 @@ BLDDIR := build
 endif
 
 # source and various derived variables
-SRCS := linecnt.cpp cpplexer_imp.cpp
+SRCS := linecnt.cpp cpplexer.cpp
 OBJS := $(SRCS:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
 
-LEX_SRC := cpplexer.l
+LEX_SRC := cpplexer_scanner.l
 LEX_INC := $(LEX_SRC:.l=.inc)
 
 LINECNT := linecnt
@@ -67,8 +67,12 @@ clean:
 # including them triggers the Lexer rule. We also need to touch the
 # source file to make sure it is recompiled with new Lexer output.
 #
-cpplexer_imp.cpp : $(LEX_INC)
-	touch cpplexer_imp.cpp
+cpplexer.cpp : $(LEX_INC)
+	touch cpplexer.cpp
+
+#
+# pattern rules
+#
 
 $(BLDDIR)/%.d : %.cpp
 	if [[ ! -e $(@D) ]]; then mkdir -p $(@D); fi
@@ -79,7 +83,7 @@ $(BLDDIR)/%.o : %.cpp
 	$(CXX) -c -o $@ $(CXXFLAGS) $(CXXFLAGS) $<
 
 %.inc : %.l
-	$(LEX) -o$@ $<
+	$(LEX) --outfile=$@ $<
 
 # include dependencies when the primary target is being built
 ifeq ($(MAKECMDGOALS),)

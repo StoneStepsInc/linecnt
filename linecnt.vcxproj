@@ -114,14 +114,14 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cpplexer_imp.cpp" />
+    <ClCompile Include="cpplexer.cpp" />
     <ClCompile Include="linecnt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="linecnt.rc" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="cpplexer.l">
+    <CustomBuild Include="cpplexer_scanner.l">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\common\win_flex_bison\win_flex.exe -o%(Filename).inc %(FullPath)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).inc;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\common\win_flex_bison\win_flex.exe -o%(Filename).inc %(FullPath)</Command>
@@ -129,7 +129,9 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cpplexer_decl.h" />
+    <ClInclude Include="cpplexer.h" />
+    <ClInclude Include="cpplexer_scanner.h" />
+    <ClInclude Include="version.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

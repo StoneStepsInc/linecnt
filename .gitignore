@@ -11,6 +11,6 @@
 /x64/Debug/
 /x64/Release/
 
-# generated lexer
-/cpplexer.inc
+# generated lexer scanner
+/cpplexer_scanner.inc
 

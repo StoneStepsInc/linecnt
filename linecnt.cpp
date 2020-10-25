@@ -27,7 +27,7 @@
 #include <stdexcept>
 #include <system_error>
 
-#include "cpplexer_decl.h"
+#include "cpplexer.h"
 #include "version.h"
 
 #if defined(_WIN32)

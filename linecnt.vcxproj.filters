@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cpplexer_imp.cpp">
+    <ClCompile Include="linecnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="linecnt.cpp">
+    <ClCompile Include="cpplexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -28,10 +28,16 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="cpplexer.l" />
+    <CustomBuild Include="cpplexer_scanner.l" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cpplexer_decl.h">
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpplexer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpplexer_scanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
