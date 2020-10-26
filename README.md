@@ -17,10 +17,12 @@ For example, this is how the following source file will be counted:
     ///                                         <-- C++ comment
     void go(const std::string& url)             <-- code
     {                                           <-- brace
-        if(url.empty())                         <-- code
+        if(url.empty()) {                       <-- code
             fw("http://localhost/");            <-- ignores `//` within a string
-        else                                    <-- code
+        }                                       <-- brace
+        else {                                  <-- code
             fw(url); // go to the URL           <-- code + C++ comment
+        }                                       <-- brace
         /* used to return an error              <-- C comment
         return result;                          <-- C comment
         */                                      <-- C comment
