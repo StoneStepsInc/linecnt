@@ -12,23 +12,29 @@ code.
 
 For example, this is how the following source file will be counted:
 
-    ///                                 <-- C++ comment
-    /// @brief Go to a URL.             <-- C++ comment
-    ///                                 <-- C++ comment
-    void go(const std::string& url)     <-- code
-    {                                   <-- brace
-        if(url.empty())                 <-- code
-            fw("http://localhost/");    <-- ignores `//` within a string
-        else                            <-- code
-            fw(url); // go to the URL   <-- code + C++ comment
-        /* used to return an error      <-- C comment
-        return result;                  <-- C comment
-        */                              <-- C comment
-    }                                   <-- brace
-                                        <-- empty line
+    ///                                         <-- C++ comment
+    /// @brief Go to a URL.                     <-- C++ comment
+    ///                                         <-- C++ comment
+    void go(const std::string& url)             <-- code
+    {                                           <-- brace
+        if(url.empty())                         <-- code
+            fw("http://localhost/");            <-- ignores `//` within a string
+        else                                    <-- code
+            fw(url); // go to the URL           <-- code + C++ comment
+        /* used to return an error              <-- C comment
+        return result;                          <-- C comment
+        */                                      <-- C comment
+    }                                           <-- brace
+                                                <-- empty line
 
 Single-quoted and double-quoted strings are recognized and comments within
 strings are ignored.
+
+Note that JavaScript's template literals are ignored by the current parser
+and may be miscounted. For example, this line will be counted as code and a
+C++ comment:
+
+    let url = `http://localhost/${path}`;
 
 ### Syntax
 
@@ -65,3 +71,4 @@ directory, and all of its sub-directories.
 Scan commont C++ extensions in the directory `/prj/src` and all of its sub-directories.
 
     linecnt -d /prj/src -s -c
+
