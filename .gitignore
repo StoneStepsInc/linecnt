@@ -1,6 +1,9 @@
 # VS directory
 /.vs/
 
+# Nuget packages
+/packages/
+
 # VS user settings file
 /linecnt.vcxproj.user
 
