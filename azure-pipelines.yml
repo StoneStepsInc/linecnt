@@ -47,9 +47,10 @@ stages:
         configuration: 'Release'
         msbuildArguments: '/property:OutDir=$(BIN_OUT_DIR)\;IntDir=$(BIN_INT_DIR)\;AZP_BUILD_NUMBER=$(BUILD_NUMBER)'
 
+      # collect package files (quote all paths or forward slashes are interpreted as options otherwise)
     - script: |
-        mkdir $(PKG_OUT_DIR)
-        move /Y $(BIN_OUT_DIR)\linecnt.exe $(PKG_OUT_DIR)\
+        mkdir "$(PKG_OUT_DIR)"
+        move /Y "$(BIN_OUT_DIR)\linecnt.exe" "$(PKG_OUT_DIR)\"
 
     - task: ArchiveFiles@2
       displayName: Make Package
