@@ -26,6 +26,9 @@ stages:
         Fedora:
           DIST_NAME: fedora
           DIST_ABBR: fed
+        Ubuntu:
+          DIST_NAME: ubuntu
+          DIST_ABBR: ubu
 
     variables:
       # give each matrix configuration its own build directory
