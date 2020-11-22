@@ -48,6 +48,7 @@ stages:
         msbuildArguments: '/property:OutDir=$(BIN_OUT_DIR)\;IntDir=$(BIN_INT_DIR)\;AZP_BUILD_NUMBER=$(BUILD_NUMBER)'
 
     - script: |
+        mkdir $(PKG_OUT_DIR)
         move /Y $(BIN_OUT_DIR)\linecnt.exe $(PKG_OUT_DIR)\
 
     - task: ArchiveFiles@2
