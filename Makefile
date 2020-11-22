@@ -36,6 +36,11 @@ ifeq ($(findstring -g,$(CXXFLAGS)),)
 CXXFLAGS += -O3
 endif
 
+# if building in Azure DevOps, pass the build number into the source
+ifdef AZP_BUILD_NUMBER
+CXXFLAGS += -DBUILD_NUMBER=$(AZP_BUILD_NUMBER)
+endif
+
 #
 # targets
 #
