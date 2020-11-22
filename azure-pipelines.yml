@@ -41,7 +41,7 @@ stages:
       displayName: Build
 
     - script: |
-        tar -czvf $(ARTIFACT_DIR)/linecnt-$(PKG_OS_ABBR)-x64-$(VERSION_LABEL).tar.gz -C $(BLDDIR) linecnt
+        tar -czvf $(ARTIFACT_DIR)/linecnt-$(DIST_ABBR)-x64-$(VERSION_LABEL).tar.gz -C $(BUILD_DIST_DIR) linecnt
       displayName: Package
-    - publish: '$(ARTIFACT_DIR)/linecnt-$(PKG_OS_ABBR)-x64-$(VERSION_LABEL).tar.gz'
+    - publish: '$(ARTIFACT_DIR)/linecnt-$(DIST_ABBR)-x64-$(VERSION_LABEL).tar.gz'
       artifact: $(System.JobName) package
