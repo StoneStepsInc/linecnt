@@ -1,0 +1,47 @@
+variables:
+  # keep this version in sync with the one defined in version.h
+  VERSION: 2-1-1
+  BUILD_NUMBER: $[counter(variables.VERSION, 1)]
+  
+  # without `format` pipeline run label is reported as an unevaluated variable name
+  VERSION_LABEL: $[format('{0}-{1}', variables.VERSION, variables.BUILD_NUMBER)]
+
+  # make sure builds don't collide on the same agent
+  BUILD_DIR: $(Build.BinariesDirectory)/$(Build.SourceBranchName)/$(System.PhaseName)
+
+  ARTIFACT_DIR: $(Build.ArtifactStagingDirectory)
+
+name: $(VERSION_LABEL)
+
+stages:
+- stage: BuildPackages
+  displayName: Build packages
+  jobs:
+  - job: linux
+    displayName: Linux
+    # actual display name will be `System.JobDisplayName + ' ' + System.JobName`
+    # System.JobName is Fedora
+    strategy:
+      matrix:
+        Fedora:
+          DIST_NAME: fedora
+          DIST_ABBR: fed
+
+    variables:
+      # give each matrix configuration its own build directory
+      BUILD_DIST_DIR: $(BUILD_DIR)/$(DIST_NAME)
+
+    pool:
+      vmImage: ubuntu-latest
+    container: stonesteps/linecnt-$(DIST_NAME):latest
+
+    steps:
+    - script: |
+        make BLDDIR=$(BUILD_DIST_DIR) AZP_BUILD_NUMBER=$(BUILD_NUMBER)
+      displayName: Build
+
+    - script: |
+        tar -czvf $(ARTIFACT_DIR)/linecnt-$(PKG_OS_ABBR)-x64-$(VERSION_LABEL).tar.gz -C $(BLDDIR) linecnt
+      displayName: Package
+    - publish: '$(ARTIFACT_DIR)/linecnt-$(PKG_OS_ABBR)-x64-$(VERSION_LABEL).tar.gz'
+      artifact: $(System.JobName) package
