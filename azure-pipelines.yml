@@ -24,6 +24,8 @@ stages:
       BIN_OUT_DIR: $(BUILD_DIR)\linecnt
       BIN_INT_DIR: $(BUILD_DIR)\obj
 
+      PKG_OUT_DIR: $(BUILD_DIR)\package-$(VERSION_LABEL)
+
     pool:
       vmImage: windows-2019
 
@@ -45,10 +47,13 @@ stages:
         configuration: 'Release'
         msbuildArguments: '/property:OutDir=$(BIN_OUT_DIR)\;IntDir=$(BIN_INT_DIR)\;AZP_BUILD_NUMBER=$(BUILD_NUMBER)'
 
+    - script: |
+        move /Y $(BIN_OUT_DIR)\linecnt.exe $(PKG_OUT_DIR)\
+
     - task: ArchiveFiles@2
       displayName: Make Package
       inputs:
-        rootFolderOrFile: '$(BIN_OUT_DIR)'
+        rootFolderOrFile: '$(PKG_OUT_DIR)'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(ARTIFACT_DIR)/linecnt-win-x64-$(VERSION_LABEL).zip'
