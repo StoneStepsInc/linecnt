@@ -8,8 +8,8 @@
 
 //
 // Build number is supplied by Azure DevOps via AZP_BUILD_NUMBER for
-// release builds. It is always zero for manual development builds.
-// See azure-pipelines.yml for details.
+// release builds and assigned to BUILD_NUMBER in linecnt-release.props.
+// It is always zero for manual development builds.
 //
 #ifndef BUILD_NUMBER
 #define BUILD_NUMBER            0

@@ -5,7 +5,14 @@
     <AZP_BUILD_NUMBER>0</AZP_BUILD_NUMBER>
   </PropertyGroup>
   <PropertyGroup />
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>BUILD_NUMBER=$(AZP_BUILD_NUMBER);_VC80_UPGRADE=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>BUILD_NUMBER=$(AZP_BUILD_NUMBER);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="AZP_BUILD_NUMBER">
       <Value>$(AZP_BUILD_NUMBER)</Value>
