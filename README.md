@@ -61,7 +61,7 @@ a relative or an absolute directory.
 
 ### Examples
 
-Scan `c`, `cpp` and `h` files in the current directory.
+Scan `.c`, `.cpp` and `.h` files in the current directory.
 
     linecnt cpp c h
 
