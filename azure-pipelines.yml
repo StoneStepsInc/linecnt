@@ -1,17 +1,14 @@
 variables:
   # keep this version in sync with the one defined in version.h
-  VERSION: 2-1-1
-  BUILD_NUMBER: $[counter(variables.VERSION, 1)]
+  VERSION: 2.1.1
+  BUILD_NUMBER: $[counter(variables.VERSION, 12)]
   
-  # without `format` pipeline run label is reported as an unevaluated variable name
-  VERSION_LABEL: $[format('{0}-{1}', variables.VERSION, variables.BUILD_NUMBER)]
-
   # make sure builds don't collide on the same agent
   BUILD_DIR: $(Build.BinariesDirectory)/$(Build.SourceBranchName)/$(System.PhaseName)
 
   ARTIFACT_DIR: $(Build.ArtifactStagingDirectory)
 
-name: $(VERSION_LABEL)
+name: $(VERSION)+$(BUILD_NUMBER)
 
 stages:
 - stage: BuildPackages
@@ -24,7 +21,7 @@ stages:
       BIN_OUT_DIR: $(BUILD_DIR)\linecnt
       BIN_INT_DIR: $(BUILD_DIR)\obj
 
-      PKG_OUT_DIR: $(BUILD_DIR)\package-$(VERSION_LABEL)
+      PKG_OUT_DIR: $(BUILD_DIR)\package-$(Build.BuildNumber)
 
     pool:
       vmImage: windows-2019
@@ -58,10 +55,10 @@ stages:
         rootFolderOrFile: '$(PKG_OUT_DIR)'
         includeRootFolder: false
         archiveType: 'zip'
-        archiveFile: '$(ARTIFACT_DIR)/linecnt-win-x64-$(VERSION_LABEL).zip'
+        archiveFile: '$(ARTIFACT_DIR)/linecnt-win-x64-$(Build.BuildNumber).zip'
         replaceExistingArchive: true
 
-    - publish: '$(ARTIFACT_DIR)/linecnt-win-x64-$(VERSION_LABEL).zip'
+    - publish: '$(ARTIFACT_DIR)/linecnt-win-x64-$(Build.BuildNumber).zip'
       artifact: Windows package
 
   - job: linux
@@ -91,8 +88,8 @@ stages:
       displayName: Build
 
     - script: |
-        tar -czvf $(ARTIFACT_DIR)/linecnt-$(DIST_ABBR)-x64-$(VERSION_LABEL).tar.gz -C $(BUILD_DIST_DIR) linecnt
+        tar -czvf $(ARTIFACT_DIR)/linecnt-$(DIST_ABBR)-x64-$(Build.BuildNumber).tar.gz -C $(BUILD_DIST_DIR) linecnt
       displayName: Package
 
-    - publish: '$(ARTIFACT_DIR)/linecnt-$(DIST_ABBR)-x64-$(VERSION_LABEL).tar.gz'
+    - publish: '$(ARTIFACT_DIR)/linecnt-$(DIST_ABBR)-x64-$(Build.BuildNumber).tar.gz'
       artifact: $(System.JobName) package
