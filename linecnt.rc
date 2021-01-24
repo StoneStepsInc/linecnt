@@ -1,7 +1,7 @@
 /*
     linecnt - a source line counting utility
 
-    Copyright (c) 2003-2020, Stone Steps Inc. (www.stonesteps.ca)
+    Copyright (c) 2003-2021, Stone Steps Inc. (www.stonesteps.ca)
 
     See COPYING and Copyright files for additional licensing and copyright information
 */
@@ -40,7 +40,7 @@ BEGIN
             VALUE "FileDescription", "Line counting utility\0"
             VALUE "FileVersion", RC_VERSION_STR
             VALUE "InternalName", "linecnt.exe\0"
-            VALUE "LegalCopyright", "Copyright © 2003-2020 Stone Steps Inc.\0"
+            VALUE "LegalCopyright", "Copyright © 2003-2021 Stone Steps Inc.\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "linecnt.exe\0"
             VALUE "PrivateBuild", " \0"

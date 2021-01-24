@@ -1,7 +1,7 @@
 /*
     linecnt - a source line counting utility
 
-    Copyright (c) 2003-2020, Stone Steps Inc. (www.stonesteps.ca)
+    Copyright (c) 2003-2021, Stone Steps Inc. (www.stonesteps.ca)
 
     See COPYING and Copyright files for additional licensing and copyright information
 */
@@ -407,7 +407,7 @@ void ProcessDirectory(const std::string& dirname)
 ///
 void PrintCopyrightLine(void)
 {
-   printf("Copyright 2003-2020, Stone Steps Inc. http://www.stonesteps.ca\n\n");
+   printf("Copyright 2003-2021, Stone Steps Inc. http://www.stonesteps.ca\n\n");
 }
 
 ///
