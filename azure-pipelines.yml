@@ -8,7 +8,7 @@ variables:
 
   ARTIFACT_DIR: $(Build.ArtifactStagingDirectory)
 
-name: $(VERSION)-$(BUILD_NUMBER)
+name: $(VERSION)+$(BUILD_NUMBER)
 
 stages:
 - stage: BuildPackages
