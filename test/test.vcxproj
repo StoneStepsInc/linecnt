@@ -126,7 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- $(OutDir) of the unit test project must point to the same location as linecnt's $(OutDir) -->
-    <Object Include="$(OutDir)\obj\cpplexer.obj" />
+    <Object Include="$(OutDir)obj\cpplexer.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
