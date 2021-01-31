@@ -520,7 +520,7 @@ int main(int argc, const char *argv[])
          printf("Code/comments ratio    : %.2f\n", (double) CodeLineCount/CommentCount);
 
       if(FileCount) {
-         printf("Source lines per file  : %.2f\n", (double) LineCount/FileCount);
+         printf("Lines per file         : %.2f\n", (double) LineCount/FileCount);
          printf("Code lines per file    : %.2f\n", (double) CodeLineCount/FileCount);
          printf("Comment lines per file : %.2f\n", (double) CommentCount/FileCount);
       }
