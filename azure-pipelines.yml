@@ -45,7 +45,7 @@ stages:
         msbuildArchitecture: 'x64'
         platform: 'x64'
         configuration: 'Release'
-        msbuildArguments: '/property:OutDir=$(BIN_OUT_DIR)\;IntDir=$(BIN_INT_DIR)\;AZP_BUILD_NUMBER=$(BUILD_NUMBER)'
+        msbuildArguments: '/property:OutDir=$(BIN_OUT_DIR)\;IntDir=$(BIN_INT_DIR)\obj\;AZP_BUILD_NUMBER=$(BUILD_NUMBER)'
 
     - task: MSBuild@1
       displayName: Build Test
@@ -54,7 +54,8 @@ stages:
         msbuildArchitecture: 'x64'
         platform: 'x64'
         configuration: 'Release'
-        msbuildArguments: '/property:OutDir=$(BIN_OUT_DIR)\;IntDir=$(BIN_INT_DIR)\test\'
+        # $(OutDir) must point to the same location as linecnt's $(OutDir) to locate parent's object files
+        msbuildArguments: '/property:OutDir=$(BIN_OUT_DIR)\;IntDir=$(BIN_INT_DIR)\test\obj\'
         
     - script: |
         $(BIN_OUT_DIR)\utest.exe --gtest_output=xml:$(TEST_RSLT_DIR)/$(TEST_RSLT_FILE)
