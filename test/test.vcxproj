@@ -43,11 +43,11 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\obj\</IntDir>
     <TargetName>utest</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\obj\</IntDir>
     <TargetName>utest</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,7 +125,8 @@
     <ClCompile Include="ut_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Object Include="..\$(Platform)\$(Configuration)\cpplexer.obj" />
+    <!-- $(OutDir) of the unit test project must point to the same location as linecnt's $(OutDir) -->
+    <Object Include="$(OutDir)\obj\cpplexer.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
