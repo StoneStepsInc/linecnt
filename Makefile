@@ -32,6 +32,9 @@ ifeq ($(strip $(BLDDIR)),)
 BLDDIR := build
 endif
 
+# install target directory
+INSTDIR := /usr/local
+
 #
 # linecnt variables
 #
@@ -100,6 +103,16 @@ $(BLDDIR)/test:
 test: $(BLDDIR)/$(UTEST)
 	$(BLDDIR)/$(UTEST) --gtest_output=xml:$(TEST_RSLT_DIR)/$(TEST_RSLT_FILE)
 
+install: $(BLDDIR)/$(LINECNT)
+	@cp -f $(BLDDIR)/$(LINECNT) $(INSTDIR)/bin
+	@if [[ ! -e $(INSTDIR)/share/doc/linecnt ]]; then mkdir -p $(INSTDIR)/share/doc/linecnt; fi
+	@cp -f COPYING Copyright README.md $(INSTDIR)/share/doc/linecnt
+
+uninstall:
+	@rm -f $(INSTDIR)/bin/$(LINECNT)
+	@rm -f $(INSTDIR)/share/doc/linecnt/{COPYING, Copyright, README.md}
+	@rmdir $(INSTDIR)/share/doc/linecnt
+
 clean:
 	@rm -f $(BLDDIR)/$(LINECNT)
 	@rm -f $(addprefix $(BLDDIR)/, $(OBJS))
@@ -113,7 +126,7 @@ clean:
 
 #
 # Dependency tracking fails for the Lexer-generated include file
-# because GCC needs all includ files present when .d files are
+# because GCC needs all include files present when .d files are
 # being generated. GNU Make has some suggestions to solve this
 # on this page:
 #
