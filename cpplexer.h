@@ -11,6 +11,7 @@
 #include "cpplexer_scanner.h"
 
 #include <cstdio>
+#include <string_view>
 
 ///
 /// @brief  Flex parser for counting lines in C-like languages.
@@ -25,16 +26,34 @@
 /// 
 class CppFlexLexer {
    public:
-      /// Constructs a Flex scanner with the specified input and output files.
-      CppFlexLexer(FILE* arg_yyin = nullptr);
+      ///
+      /// @brief  Source line count result structure.
+      ///
+      struct Result {
+         unsigned int linecnt = 0;           ///< Total line count.
+         unsigned int cmntcnt = 0;           ///< Count of lines with comments.
+         unsigned int cppcnt = 0;            ///< Count of lines with C++ comments
+         unsigned int ccnt = 0;              ///< Count of lines with C-style comments.
+         unsigned int codecnt = 0;           ///< Count of lines with code.
+         unsigned int bracecnt = 0;          ///< Count of lines with a single brace.
+         unsigned int emptycnt = 0;          ///< Count of empty lines.
+      };
 
+   private:
+      FILE  *srcfile;                        ///< Source file handle (may be `nullptr`).
+
+   public:
+      /// Constructs a Flex scanner with a handle to the specified source file.
+      CppFlexLexer(FILE* &&arg_yyin = nullptr);
+
+      /// Constructs a Flex scanner with the specified source text.
+      CppFlexLexer(const std::string_view& source);
+
+      /// If Flex scanner was constructed with a file handle, closes that handle.
       ~CppFlexLexer(void);
       
-      /// Returns a poiner to the current token string.
-      const char *YYText(void);
-
-      /// Returns the next parsed token identifier.
-      int yylex(void);
+      /// Runs the source through the Flex scanner and returns resulting counts.
+      Result CountLines(void);
 };
 
 #endif // CPPLEXER_H

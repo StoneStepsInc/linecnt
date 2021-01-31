@@ -8,6 +8,20 @@
 
 SHELL := /bin/bash
 
+#
+# Makefile parameters:
+#
+#	all targets:
+#		BLDDIR=/path/to/build/dir (default ./build)
+#
+#	linecnt:
+# 		AZP_BUILD_NUMBER=auto-incremented-build-number
+#	
+#	test:
+#		TEST_RSLT_DIR=/path/to/test/results/directory (default BLDDIR)
+#       TEST_RSLT_FILE=test-results-file-name (default utest.xml)
+#
+
 # delete all default suffixes
 .SUFFIXES:
 
@@ -18,7 +32,10 @@ ifeq ($(strip $(BLDDIR)),)
 BLDDIR := build
 endif
 
-# source and various derived variables
+#
+# linecnt variables
+#
+
 SRCS := linecnt.cpp cpplexer.cpp
 OBJS := $(SRCS:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
@@ -27,6 +44,27 @@ LEX_SRC := cpplexer_scanner.l
 LEX_INC := $(LEX_SRC:.l=.inc)
 
 LINECNT := linecnt
+
+#
+# utest variables
+#
+
+TEST_SRCS := test/ut_main.cpp test/ut_tests.cpp
+
+TEST_OBJS := $(TEST_SRCS:.cpp=.o)  \
+				cpplexer.o
+
+TEST_DEPS := $(TEST_OBJS:.o=.d)
+
+UTEST := utest
+
+ifeq ($(strip $(TEST_RSLT_DIR)),)
+TEST_RSLT_DIR := $(BLDDIR)
+endif
+
+ifeq ($(strip $(TEST_RSLT_FILE)),)
+TEST_RSLT_FILE := $(UTEST).xml
+endif
 
 # C++ compiler flags
 CXXFLAGS = -std=c++17 -fexceptions -Werror -pedantic
@@ -50,13 +88,28 @@ $(BLDDIR)/$(LINECNT): $(addprefix $(BLDDIR)/,$(OBJS)) | $(BLDDIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ -lstdc++
 
 $(BLDDIR): 
-	@mkdir $(BLDDIR)
+	@mkdir -p $(BLDDIR)
+
+# utest
+$(BLDDIR)/$(UTEST): $(addprefix $(BLDDIR)/,$(TEST_OBJS)) | $(BLDDIR)/test
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lstdc++ -lpthread -lgtest
+
+$(BLDDIR)/test:
+	mkdir -p $(BLDDIR)/$(TEST)
+
+test: $(BLDDIR)/$(UTEST)
+	$(BLDDIR)/$(UTEST) --gtest_output=xml:$(TEST_RSLT_DIR)/$(TEST_RSLT_FILE)
 
 clean:
 	@rm -f $(BLDDIR)/$(LINECNT)
 	@rm -f $(addprefix $(BLDDIR)/, $(OBJS))
 	@rm -f $(addprefix $(BLDDIR)/, $(DEPS))
 	@rm -f $(LEX_INC)
+	@rm -f $(BLDDIR)/$(UTEST)
+	@# use TEST_SRCS because TEST_OBJS has some of linecnt files
+	@rm -f $(addprefix $(BLDDIR)/, $(TEST_SRCS:.cpp=.o))
+	@rm -f $(addprefix $(BLDDIR)/, $(TEST_SRCS:.cpp=.d))
+	@rm -f $(TEST_RSLT_DIR)/$(TEST_RSLT_FILE)
 
 #
 # Dependency tracking fails for the Lexer-generated include file
@@ -90,9 +143,16 @@ $(BLDDIR)/%.o : %.cpp
 %.inc : %.l
 	$(LEX) --outfile=$@ $<
 
-# include dependencies when the primary target is being built
+# include dependencies when the primary target is being built (default or explicit)
 ifeq ($(MAKECMDGOALS),)
 include $(addprefix $(BLDDIR)/, $(DEPS))
 else ifneq ($(filter $(BLDDIR)/$(LINECNT),$(MAKECMDGOALS)),)
 include $(addprefix $(BLDDIR)/, $(DEPS))
+endif
+
+# unit test dependencies
+ifneq ($(filter test,$(MAKECMDGOALS)),)
+include $(addprefix $(BLDDIR)/, $(TEST_DEPS))
+else ifneq ($(filter $(BLDDIR)/$(UTEST),$(MAKECMDGOALS)),)
+include $(addprefix $(BLDDIR)/, $(TEST_DEPS))
 endif

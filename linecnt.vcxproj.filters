@@ -43,6 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="packages.config" />
+    <None Include="packages.linecnt.config" />
   </ItemGroup>
 </Project>

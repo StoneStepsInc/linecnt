@@ -10,4 +10,4 @@ WORKDIR /root
 #
 # Dependencies
 #
-RUN dnf -y install gcc-c++ make flex
+RUN dnf -y install gcc-c++ make flex gtest-devel

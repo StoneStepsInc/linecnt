@@ -7,6 +7,11 @@
 */
 #define __CPPLEXER_IMP_CPP
 
+#include <cstdio>
+
+#include <stdexcept>
+#include <string>
+
 extern "C" {
 //
 // A Flex scanner generated from cpplexer_scanner.l.
@@ -20,24 +25,96 @@ extern "C" {
 
 #include "cpplexer.h"
 
-///
-/// Both file handles are passed to `yyrestart` verbatim.
-///
-CppFlexLexer::CppFlexLexer(FILE* arg_yyin)
+CppFlexLexer::CppFlexLexer(FILE* &&arg_yyin) :
+      srcfile(std::move(arg_yyin))
 {
    yyrestart(arg_yyin);
 }
 
+CppFlexLexer::CppFlexLexer(const std::string_view& source) :
+      srcfile(nullptr)
+{
+   yy_scan_bytes(source.data(), (int) source.length());
+}
+
 CppFlexLexer::~CppFlexLexer(void)
 {
+   yylex_destroy();
+
+   if(srcfile)
+      fclose(srcfile);
 }
 
-int CppFlexLexer::yylex(void)
+CppFlexLexer::Result CppFlexLexer::CountLines(void)
 {
-   return ::yylex();
-}
+   unsigned int linecnt = 0, cmntcnt = 0, cppcnt = 0, ccnt = 0, codecnt = 0, bracecnt = 0, emptycnt = 0;
+   int token1;
 
-const char *CppFlexLexer::YYText(void)
-{
-   return yytext;
+   linecnt = 0;
+   if((token1 = yylex()) != TOKEN_EOF) {
+      do {
+         switch (token1) {
+            case TOKEN_EMPTY_LINE:
+            case TOKEN_EMPTY_LINE + TOKEN_EOF:
+               linecnt++;
+               emptycnt++;
+               break;
+            case TOKEN_BRACE_LINE:
+            case TOKEN_BRACE_LINE + TOKEN_EOF:
+               linecnt++;
+               bracecnt++;
+               break;
+            case TOKEN_CODE_EOL:
+            case TOKEN_CODE_EOL + TOKEN_EOF:
+               linecnt++;
+               codecnt++;
+               break;
+            case TOKEN_C_COMMENT_EOL:
+            case TOKEN_C_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               ccnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_CPP_COMMENT_EOL:
+            case TOKEN_CPP_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               cppcnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_C_CPP_COMMENT_EOL:
+            case TOKEN_C_CPP_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               cppcnt++;
+               ccnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_CODE_C_COMMENT_EOL:
+            case TOKEN_CODE_C_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               ccnt++;
+               codecnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_CODE_CPP_COMMENT_EOL:
+            case TOKEN_CODE_CPP_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               cppcnt++;
+               codecnt++;
+               cmntcnt++;
+               break;
+            case TOKEN_CODE_C_CPP_COMMENT_EOL:
+            case TOKEN_CODE_C_CPP_COMMENT_EOL + TOKEN_EOF:
+               linecnt++;
+               ccnt++;
+               cppcnt++;
+               codecnt++;
+               cmntcnt++;
+               break;
+            default:
+               throw std::runtime_error("Unknown token: " + std::string(yytext) + " at " + std::to_string(linecnt));
+         }
+      } while(token1 < TOKEN_EOF && ((token1 = yylex()) != TOKEN_EOF));
+   }
+
+   return {linecnt, cmntcnt, cppcnt, ccnt, codecnt, bracecnt, emptycnt};
 }

@@ -1,9 +1,0 @@
-/* 
-	trailing brace test 
-*/
-code 
-
-// C++ comment 
-if(test) {
-   code     // C++ comment
-}
