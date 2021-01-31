@@ -39,10 +39,16 @@ EOL                  \r\n|\r|\n
 %x c_comment
 %x cpp_comment
 
+/* code followed by a C-style comment */
 %x code_c_comment
+
+/* code followed by a C++ comment */
 %x code_cpp_comment
+
+/* code followed by a C-style comment followed by a C++ comment */
 %x code_c_cpp_comment
 
+/* a C-style comment followed by a C++ comment */
 %x c_cpp_comment
 
 %x c_comment_open
@@ -62,7 +68,7 @@ EOL                  \r\n|\r|\n
  * string literal could be counted as a C++ comment unless string characters are 
  * ignored:
  *
- *   const char *url = "http://localhost/"
+ *   const char *url = "http://localhost/";
  *
  * Both types of strings are considered code, which means that we only need to 
  * track whether we saw any C comments prior to encountering the opening quote 

@@ -185,10 +185,10 @@ void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
       // add the new directory to the current path
       dirpath += DIRSEP + *iter;
 
-      // move the new directory name into the new state
+      // move the new directory name into the new top state
       stack.push({std::list<std::string>(), std::move(*iter)});
 
-      // and remove the empty directory node from the state list
+      // remove the empty directory node from the state list
       subdirs->erase(iter);
 
       // and assign the pointer to the new directory list
@@ -219,9 +219,8 @@ void ProcessDirList(const std::string& basedir, std::list<std::string>&& dirs)
          if(stack.empty())
             return;
 
-         // check if more directories to process in the parent directory
+         // reset the directory list to the parent directory at the top
          subdirs = &stack.top().subdirs;
-
       }
 
       iter = subdirs->begin();

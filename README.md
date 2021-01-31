@@ -18,7 +18,7 @@ For example, this is how the following source file will be counted:
     void go(const std::string& url)             <-- code
     {                                           <-- brace
         if(url.empty()) {                       <-- code
-            fw("http://localhost/");            <-- ignores `//` within a string
+            fw("http://localhost/");            <-- code (ignores `//` within a string)
         }                                       <-- brace
         else {                                  <-- code
             fw(url); // go to the URL           <-- code + C++ comment
