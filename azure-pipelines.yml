@@ -8,6 +8,9 @@ variables:
 
   ARTIFACT_DIR: $(Build.ArtifactStagingDirectory)
 
+  # test results directory
+  TEST_RSLT_DIR: $(Common.TestResultsDirectory)
+
 name: $(VERSION)+$(BUILD_NUMBER)
 
 stages:
@@ -96,6 +99,7 @@ stages:
           DIST_ABBR: alp
 
     variables:
+      TEST_RSLT_FILE: linecnt_$(DIST_ABBR)_utest.xml
       # give each matrix configuration its own build directory
       BUILD_DIST_DIR: $(BUILD_DIR)/$(DIST_NAME)
 
