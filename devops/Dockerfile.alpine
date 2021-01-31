@@ -1,0 +1,13 @@
+#
+# docker build --tag=stonesteps/linecnt-alpine:latest \
+#               --file=/path/to/Dockerfile.alpine \
+#                   /path/to/context
+#
+FROM alpine
+
+WORKDIR /root
+
+#
+# Dependencies
+#
+RUN apk add bash g++ make flex gtest-dev

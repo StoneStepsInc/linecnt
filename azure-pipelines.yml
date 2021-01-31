@@ -91,6 +91,9 @@ stages:
         Ubuntu:
           DIST_NAME: ubuntu
           DIST_ABBR: ubu
+        Alpine:
+          DIST_NAME: alpine
+          DIST_ABBR: alp
 
     variables:
       # give each matrix configuration its own build directory
