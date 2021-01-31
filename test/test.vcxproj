@@ -43,11 +43,11 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\obj\</IntDir>
+    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\obj\$(ProjectName)\</IntDir>
     <TargetName>utest</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\obj\</IntDir>
+    <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\obj\$(ProjectName)\</IntDir>
     <TargetName>utest</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

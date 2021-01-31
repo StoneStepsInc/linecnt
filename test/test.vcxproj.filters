@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="$(OutDir)\obj\cpplexer.obj">
+    <Object Include="$(OutDir)obj\cpplexer.obj">
       <Filter>obj</Filter>
     </Object>
   </ItemGroup>
