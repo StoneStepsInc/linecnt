@@ -95,9 +95,6 @@ stages:
         Ubuntu:
           DIST_NAME: ubuntu
           DIST_ABBR: ubu
-        Alpine:
-          DIST_NAME: alpine
-          DIST_ABBR: alp
 
     variables:
       TEST_RSLT_FILE: linecnt_$(DIST_ABBR)_utest.xml
