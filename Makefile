@@ -19,13 +19,13 @@ SHELL := /bin/bash
 #	
 #	test:
 #		TEST_RSLT_DIR=/path/to/test/results/directory (default BLDDIR)
-#       TEST_RSLT_FILE=test-results-file-name (default utest.xml)
+#		TEST_RSLT_FILE=test-results-file-name (default utest.xml)
 #
 
 # delete all default suffixes
 .SUFFIXES:
 
-.PHONY: clean
+.PHONY: clean install uninstall test
 
 # if there is no build directory supplied, use the default
 ifeq ($(strip $(BLDDIR)),)
